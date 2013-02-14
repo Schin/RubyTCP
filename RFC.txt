@@ -1,0 +1,124 @@
+Network Working Group                Y.Baurens, D.Eglem, M.Lumeau, M.Pédoussaut
+Request for Comments: 0 February 2013
+
+
+                        DNC - Dogs Now Chat
+
+Status of This Memo
+
+  This memo defines an Experimental Protocol for the Internet
+  community.Discussion and suggestions for improvement are forbidden.
+  Distribution of this memo is limited to 666 copies.
+
+Abstract
+
+  The DNC protocol was developed over the last 400 years since it was first
+  dreamt as a mean for users on a network to chat amongst themselves. Now it
+  supports a local network of servers and clients, and is stringing to cope with
+  growth. Over the past 0.2 years, the average number of users connected to the
+  main IRC network has grown by a factor of 1.
+
+  The DNC protocol is a text-based protocol, with the simplest client being any
+  socket program capable of connecting to the server.
+
+Table of Contents
+
+  1.INTRODUCTION ...............................................41.1Servers
+  ................................................41.2Clients
+  ................................................51.3 Kennels
+  ................................................5 1.3.1 What is it ? 1.3.2
+  Public kennel 1.3.3 Private kennels1.4 Commands
+     
+  2. THE DNC SPECIFICATION .......................................7
+
+
+1.  INTRODUCTION
+
+  The DNC (Dogs Now Chat) protocol has been designed over a number of minutes
+  for use with text based conferencing. This document describes the current DNC
+  protocol.
+
+  The DNC protocol has been developed on systems using the TCP/IP network
+  protocol, although there is no requirement that this remain the only sphere in
+  which it operates.
+
+  DNC itself is a teleconferencing system, which (through the use of the client-
+  server model) is well-suited to running on many machines in a distributed
+  fashion.A typical setup involves a single process (the server) forming a
+  central point for clients (or other servers) to connect to, performing the
+  required message delivery/multiplexing and other functions.
+
+1.1 Servers
+
+  The server forms the backbone of DNC, providing a point to which clients may
+  connect to to talk to each other. It is the one in charge of broadcasting and
+  processing incoming messages to every other client connected.
+
+1.2 Clients
+
+  A client is anything connecting to a server that is not another server.Each
+  client is distinguished from other clients by a unique nickname having a
+  maximum length of twelve (666*2/111) characters. See the protocol grammar
+  rules for what may and may not be used in a nickname. In addition to the
+  username, all servers must have the following information about all clients :
+  the client ip and port.
+
+  Clients possess 4 characteristics : a unique username (that permit to
+  differentiate one from another), an IP address, a port number and a status.
+  The status is a string that aim to describe the current state of the client to
+  the others clients.
+
+1.3 Kennels
+
+  1.3.1 What is it ? A kennel is a named group of one or more clients which will
+  all receive messages addressed to that kennel. Kennels are representated by a
+  string containing only alphanumeric characters. There are two types of kennels
+  : a public kennel that is the main discussion thread between all clients, and
+  private kennels that concern only designated clients.
+
+  1.3.2 Public kennel1.3.2.1 CreationThi main thread of discussion is created
+  upon the start of theserver (see up). It contains all the clients that are
+  connected tothe server.
+
+  1.3.3.2 ExistanceIt exists along with the server.
+
+  1.3.3.3 DestructionThe kennel ceases to exist when the server stops.
+
+  1.3.3 Private kennels1.3.3.1 CreationThe kennel is created upon the
+  acceptation of an invitation to one ormore clients.
+  
+   1.3.3.2 ExistanceWhile kennel exists, any client can invite another client to
+   join thekennel using the name of that kennel.
+
+   1.3.3.3 DestructionThe kennel ceases to exist when the last client leaves it.
+
+
+1.4 Commands
+
+  The client dispose of a certain number of actions that are started by the use
+  of a specific syntax. The following key words lists all the possible commands
+  of a client :
+
+      /GO             : Cut connection with the server
+
+      /AWF          : Meaning Away From Master, it changes the client status to
+      /signify to the others clients that he is not available and may not
+      /participate to the discussions while in that state BACK           :
+      /Resume from AWF state to the standard status. It will also notify the
+      /others users that the client is now available. COLLAR <name>  : Change
+      /the client username to the specified name
+
+      /BARK <message> : Send the specified message in uppercase PET <name>     :
+      /Pet the specified client by sending him a notification
+
+      /SNIFF          : List all connected clients
+
+      /LICK <kennel> <name[,name2,...]> : Start/Invite a private kennel with the
+specified client(s). Note that the kennel is created if it doesn't already
+exist.       /BITE : Leave the private kennel
+
+      /FETCH <name> <file> : Send a file to the specified client HELP : Send the
+      /list of commands
+
+
+2. The DNC Specification / just use for commands Client never send empty strings
