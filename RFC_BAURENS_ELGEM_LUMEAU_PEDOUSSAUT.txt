@@ -1,0 +1,464 @@
+Network Working Group                Y.Baurens, D.Eglem, M.Lumeau, M.Pédoussaut
+Request for Comments: 666                            
+                                                                  February 2013
+
+
+                          DNC - Dogs Now Chat
+  ______                   _   _                 _____ _           _   
+  |  _  \                 | \ | |               /  __ \ |         | |  
+  | | | |___   __ _ ___   |  \| | _____      __ | /  \/ |__   __ _| |_ 
+  | | | / _ \ / _` / __|  | . ` |/ _ \ \ /\ / / | |   | '_ \ / _` | __|
+  | |/ / (_) | (_| \__ \  | |\  | (_) \ V  V /  | \__/\ | | | (_| | |_ 
+  |___/ \___/ \__, |___/  \_| \_/\___/ \_/\_/    \____/_| |_|\__,_|\__|
+               __/ |                                                  
+              |___/                                                   
+                   __,-----._                       ,-. 
+               ,'   ,-.    \`---.          ,-----<._/ 
+              (,.-. o:.`    )),"\\-._    ,'         `. 
+             ('"-` .\       \`:_ )\  `-;'-._          \ 
+            ,,-.    \` ;  :  \( `-'     ) -._     :   `: 
+           (    \ `._\\ ` ;             ;    `    :    ) 
+            \`.  `-.    __   ,         /  \        ;, ( 
+             `.`-.___--'  `-          /    ;     | :   | 
+               `-' `-.`--._          '           ;     | 
+                     (`--._`.                ;   /\    | 
+                      \     '                \  ,  )   : 
+                      |  `--::----            \'   ;  ;| 
+                      \    .__,-      (        )   :  :| 
+                       \    : `------; \      |    |   ; 
+                        \   :       / , )     |    |  ( 
+                         \   \      `-^-|     |   / , ,\ 
+                          )  )          | -^- ;   `-^-^' 
+                       _,' _ ;          |    | 
+                      / , , ,'         /---. : 
+                      `-^-^'          (  :  :,' 
+                                       `-^--' 
+
+
+Status of This Memo
+
+  This memo defines an Experimental Protocol for the Internet
+  community.  Discussion and suggestions for improvement are forbidden.
+  Distribution of this memo is limited to 666 copies.
+
+Abstract
+
+  The DNC protocol was developed over the last 400 years since it was
+  first dreamt as a mean for users on a network to chat amongst themselves.
+  Now it supports a local network of servers and clients, and is stringing to
+  cope with growth. Over the past 0.2 years, the average number of users
+  connected to the main DNC network has grown by a factor of 1.
+
+  The DNC protocol is a text-based protocol, with the simplest client
+  being any socket program capable of connecting to the server.
+
+Table of Contents
+
+  1.  INTRODUCTION
+    1.1  Servers
+    1.2  Clients
+    1.3 Kennels
+      1.3.1 What is it ?
+      1.3.2 Public kennel
+      1.3.3 Private kennels
+
+  2. THE DNC SPECIFICATION
+    2.1 List of DNC commands 
+    2.2 Commands specifications
+      2.2.1 Simple message
+      2.2.2 /GO command    
+      2.2.3 /AFM command   
+      2.2.4 /BACK command  
+      2.2.5 /COLLAR command
+      2.2.6 /BARK command  
+      2.2.7 /PET command   
+      2.2.8 /SNIFF command 
+      2.2.9 /LICK command  
+      2.2.10 /BITE command 
+      2.2.11 /FETCH command
+      2.2.12 /HELP command 
+      2.2.13 Unknown command
+    2.3 Operating specifications
+
+1.  INTRODUCTION
+
+  The DNC (Dogs Now Chat) protocol has been designed over a number of minutes
+  for use with text based conferencing. This document describes the
+  current DNC protocol.
+
+  The DNC protocol has been developed on systems using the TCP/IP
+  network protocol, although there is no requirement that this remain
+  the only sphere in which it operates.
+
+  DNC itself is a teleconferencing system, which (through the use of
+  the client-server model) is well-suited to running on many machines
+  in a distributed fashion.  A typical setup involves a single process
+  (the server) forming a central point for clients (or other servers)
+  to connect to, performing the required message delivery/multiplexing
+  and other functions.
+
+1.1 Servers
+
+  The server forms the backbone of DNC, providing a point to which clients may 
+  connect to to talk to each other. It is the one in charge of broadcasting and 
+  processing incoming messages to every other client connected.
+  It also keep a log of all conversation and date every event(message, command,
+  connection,...) into a file.
+
+1.2 Clients
+
+  A client is anything connecting to a server that is not another
+  server.  Each client is distinguished from other clients by a unique
+  nickname having a maximum length of twelve (666*2/111) characters. See the
+  protocol grammar rules for what may and may not be used in a
+  nickname. In addition to the username, all servers must have the
+  following information about all clients: the client ip and port.
+
+  Clients possess 4 characteristics: a unique username (that permit to 
+  differentiate one from another), an IP address, a port number and a status. 
+  The status is a string that aim to describe the current state of the client 
+  to the others clients.
+
+  Client interface shall display all received messages with the reception time.
+  A message is a sequence of characters (140 max) and ends with "\n\r".
+
+1.3 Kennels
+
+  1.3.1 What is it ?
+    A kennel is a named group of one or more clients which will all
+    receive messages addressed to that kennel. Kennels are representated
+    by a string containing up to eighteen (666*3/111) alphanumeric characters.
+    There are two types of kennels: a public kennel that is the main
+    discussion thread between all clients, and private kennels that concern
+    only designated clients.
+
+  1.3.2 Public kennel
+    1.3.2.1 Creation
+      The main thread of discussion is created upon the start of the
+      server (see up). It contains all the clients that are connected to
+      the server.
+
+    1.3.3.2 Existance
+      It exists along with the server.
+
+    1.3.3.3 Destruction
+      The kennel ceases to exist when the server stops.
+
+  1.3.3 Private kennels
+    1.3.3.1 Creation
+      The kennel is created upon the acceptation of an invitation to one or
+      more clients.
+
+    1.3.3.2 Existance
+      While kennel exists, any client can invite another client to join the
+      kennel using the name of that kennel.
+
+    1.3.3.3 Destruction
+      The kennel ceases to exist when the last client leaves it.
+
+
+2. The DNC Specification
+
+2.1 Lists of DNC commands & codes
+
+  2.1.1 Returned codes
+
+  0xx : corresponds to a valid reponse
+  1xx : signify that an error occured
+  2xx : signify that a request has been accepted
+  3xx : signify that a request has been rejected
+  4xx : request corresponding to nothing known
+
+  See below for more precisions on each code.
+
+  2.1.2  Commands
+
+  The client dispose of a certain number of actions that are started by the
+  use of a specific syntax. The format used by all client shall be "CMD" 
+  followed by the current kennel name, followed by the command name and 
+  possibles arguments. Each of these elements are to be separated by a single
+  space.
+
+    2.1.2.1 GO
+      Arguments: none
+
+      Restrictions: none
+
+      Formats:
+        C: CMD <kennel> GO
+        S: 001 <C>
+
+      Description: 
+        Cut connection with the server.
+
+      Complementary informations: 
+        More advanced version may include an argument to display a custom 
+        message to be displayed to other clients before disconnection.
+
+    2.1.2.2 AFM 
+      Arguments: none
+
+      Restrictions:
+        May only be given when status different from AFM.
+
+      Formats:
+        C: CMD <kennel> AFM
+        [client status: BACK]
+          S: 002 <kennel> <C>
+        [client status: AFM]
+          S->C: 102 <kennel>
+
+      Description:
+        Meaning Away From Master, it changes the client status to 
+        signify to the others clients that he is not available and 
+        may not participate to the discussions while in that state.
+
+      Complementary informations: none
+
+
+    2.1.2.3 BACK 
+      Arguments: none
+
+      Restrictions:
+        May only be given when status equals AFM.
+
+      Formats:
+        C: CMD <kennel> BACK
+        [client status: AFM]
+          S: 003 <kennel> <C>
+        [client status: BACK]
+          S->C: 103 <kennel>
+
+      Description:
+        Resume from AFM state to the default status. 
+        It will also notify the others users that the client is now available.
+
+      Complementary informations:
+        More advanced version may implement other status and use this command
+        to change back to the default status.
+
+    2.1.2.4 COLLAR 
+      Arguments: name
+
+      Restrictions:
+        Client status must be diferent to AFM.
+        Given argument must be a valid username (12 alpha chars max).
+        The username must not be already atributed to a client.
+
+      Formats:
+        C: CMD <kennel> COLLAR < username>
+        [free valid username]
+          S: 004 <public_kennel> <old_username> <new_username>
+        [already existing username]
+          S->C: 104 <kennel> <new_username>
+        [invalid string for username]
+          S->C: 105 <kennel> <invalid_name>
+
+      Description:
+        Change the client username to the specified name. 
+
+      Complementary informations:
+        More advanced version may forbid/reserve some usernames for various
+        reasons.
+
+    2.1.2.5 BARK
+      Arguments: message
+
+      Restrictions:
+        Client status must be different from AFM.
+        Message is submitted to the same restrictions as a standard message
+        request.
+
+      Formats:
+        C: CMD <kennel> BARK <message>
+        S: 005 <kennel> <message>
+
+      Description:
+        Send the specified message with a notification for the client to apply 
+        a special transformation to the message. 
+
+      Complementary informations: none
+
+    2.1.2.6 PET 
+      Arguments: name
+
+      Restrictions:
+        Client status must be different from AFM.
+        The username must correspond to an existing client.
+
+      Formats:
+        C1: CMD <kennel> PET <C2>
+        [C2 exists]
+          S: 006 <kennel> <C1> <C2>
+        [C2 doesn’t exist]
+          S->C1: 106 <kennel> <C2>
+
+      Description:
+        Display on every kennel a message that signal the client pet the client
+        corresponding to the given name.
+
+      Complementary informations:
+        More advanced version may include an argument to display a custom 
+        message to be displayed.
+
+    2.1.2.7 SNIFF 
+      Arguments: none
+
+      Restrictions: none
+
+      Formats: 
+        C: CMD <kennel> SNIFF [K1,K2,...]
+        S: 008 <kennel> <C1[,C2,C3,...]>
+
+      Description: List all connected clients
+
+      Complementary informations:
+        More advanced version may include an argument to specify the kennel or
+        kennels.
+
+    2.1.2.8 LICK
+      Arguments: kennel_name, user_name
+
+      Restrictions: 
+
+      Formats:
+        [Normal use]
+          C1: CMD <kennel> LICK <kennel1> <C2>
+          S->C2: 009 <kennel> <C1>
+        [Acceptation]
+          C2->S: CMD ACCEPT_LICK <C1>
+          S->C1: 209 <C2>
+        [Refusal]
+          C2->S: CMD REFUSE_LICK <C1>
+          S->C1: 309 <C2>
+        [Already attributed kennel name]
+          C: CMD <kennel> LICK <kennel1> <C2>
+          S: 
+        [C2 does not exist]
+          C:
+          S:
+        [Bad command usage]
+          C: CMD <kennel> LICK 
+          S->C1: 100 <kennel>
+
+      Description: 
+
+      Complementary informations:
+
+    2.1.2.9
+      Arguments: 
+
+      Restrictions: 
+
+      Formats:
+        
+
+      Description: 
+
+      Complementary informations: 
+  
+  /SNIFF         : List all connected clients
+
+  /LICK <kennel> <name[,name2,...]>: Start/Invite a private kennel with the
+                    specified client(s). Note that the kennel is created if 
+                    it doesn't already exist.
+
+  /BITE          : Leave the private kennel.
+
+  /FETCH < username> <file>: Send a file to the specified client.
+  
+  /HELP          : Send the list of commands.
+
+  Note that all the commands are not case sensitive.
+
+
+2.2 Commands specifications
+
+  The following describes the format in which messages are sent and receive 
+  between the clients and the server.
+
+  Note that, in the current version, everything that may follow status commands 
+  (e.g.: GO, AFM, BITE,...) and the HELP command will be ignored by the server.   
+
+  2.2.1 Simple message
+    C: MSG <kennel> <message>
+    S: 000 <kennel> <message>
+
+
+  2.2.7 /PET command
+    
+
+  2.2.8 /SNIFF command
+    C: CMD <kennel> SNIFF
+    S: 008 <kennel> <C1[,C2,C3,...]>
+
+  2.2.9 /LICK command
+    
+
+  2.2.10 /BITE command
+    C: CMD <kennel> BITE
+    [user is in a private kennel]
+      S: 010 <kennel> <C>
+    [user is not in a private kennel]
+      S: 110 <kennel> <C>
+
+  2.2.11 /FETCH command
+    C1: <kennel> CMD FETCH < C2> <file>
+    S->C2: 011 <kennel> <C1> <file>
+    [Acceptation]
+      C2->S: CMD ACCEPT_FETCH <C1> <file>
+      S->C1: 211 <C2> <file>
+    [Refusal]
+      C2->S: CMD REFUSE_FETCH <C1> <file>
+      S->C1: 311 <C2> <file>
+    [Bad command usage]
+      C: CMD <kennel> FETCH
+      S: 100 <kennel>
+
+
+  2.2.12 /HELP command
+    C: CMD <kennel> HELP
+    S: 012 <kennel> <CMD1[,CMD2,CMD3,...]>
+
+  2.2.13 Unknown command
+    C: CMD <kennel> <unkown cmd>
+    S: 404 <kennel>
+
+
+2.3 Operating specifications
+
+CMD is the flag for commands
+MSG is the flag for simple messages
+
+Server: Process messages data on the key word (CMD/MSG)
+
+Restrictions:
+  username: alphanum
+  kennel: alphanum
+  message: can contain up to 140 characters. End with "\n\r".
+  file: considered as Bytes
+
+File transfert protocol: TCP 
+The reason for choosing TCP over UDP is that on hand you’ve got proper P2P 
+connections with UDP, but you have to implement your own flow control 
+and reliability algorithms. On the other hand, TCP P2P connections seem 
+very tricky to setup and aren’t supported on many routers but TCP provides 
+greater security in the transfert as it is more reliable than UDP.
+    __         __ _                    
+   / /   ___  / /( )_____   ____ _____ 
+  / /   / _ \/ __/// ___/  / __ `/ __ \
+ / /___/  __/ /_  (__  )  / /_/ / /_/ /
+/_____/\___/\__/ /____/   \__, /\____/ 
+                         /____/        
+                                             ^
+                                            //\
+                                               \
+                          \\              .__=. \
+                           \____        ,' -(@)\-\<)
+                            \__ \      (_______/_:\
+                           >==.\ \___,'  /# #\ | : \____
+                             ,\\\___/|_|##(O)##| `./\---.
+                            / ,`--'   ,======'//, //.\ . \
+                           ( ______)_//<_> O////  ( (@O ) )
+                            (________/ ====='o'    \ `-' /
+                             `----'                 `---' 
