@@ -1,6 +1,6 @@
 require "socket"
 
-DOMAIN = "172.31.190.56"
+DOMAIN = "localhost"
 PORT = 2626
 TAILLE_TAMPON = 1000
 

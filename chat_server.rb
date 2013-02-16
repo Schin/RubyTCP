@@ -1,13 +1,13 @@
 require 'socket'
 
-class ChatServer
+class DNCServer
 
  def initialize ( port )
     @descriptors  = Array::new # array to keep track of the sockets that exist for the server
     @clients      = Hash::new  # hash to keep all pseudo of the ips for the server
     @serverSocket = TCPServer.new("", port)
     @serverSocket.setsockopt(Socket::SOL_SOCKET, Socket::SO_REUSEADDR, 1)
-    print("Chatserver started on port %d\n", port)
+    puts "Dog Now Chat started on port #{port}"
     @descriptors.push( @serverSocket ) #add socket to descriptor array
  end
 
@@ -82,4 +82,4 @@ end
 
 
 
-myChatServer = ChatServer.new(2626).run
+myDogServer = DNCServer.new(2626).run

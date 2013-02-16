@@ -317,7 +317,9 @@ Table of Contents
         kennels.
 
     2.1.2.8 LICK
-      Arguments: kennel_name, user_name
+      Arguments:
+        a valid kennel name (doesn't already exist) and the username of an
+        other client.
 
       Restrictions: 
 
@@ -333,10 +335,10 @@ Table of Contents
           S->C1: 309 <C2>
         [Already attributed kennel name]
           C: CMD <kennel> LICK <kennel1> <C2>
-          S: 
+          S: 109 <kennel1>
         [C2 does not exist]
-          C:
-          S:
+          C: CMD <kennel> LICK <kennel1> <C2>
+          S: 109 <C2>
         [Bad command usage]
           C: CMD <kennel> LICK 
           S->C1: 100 <kennel>
@@ -345,7 +347,47 @@ Table of Contents
 
       Complementary informations:
 
-    2.1.2.9
+    2.1.2.9 BITE
+      Arguments: none
+
+      Restrictions:
+        May only be given when the client is in a private kennel
+
+      Formats:
+        [user is in a private kennel]
+          C: CMD <kennel> BITE
+          S: 010 <kennel> <C>
+        [user is not in a private kennel]
+          C: CMD <kennel> BITE
+          S: 110 <kennel> <C>
+
+      Description: 
+
+      Complementary informations: 
+
+    2.1.2.10 FETCH 
+      Arguments:
+        a valid username and a file which may refer to a file with read right
+      Restrictions: 
+
+      Formats:
+        C1: <kennel> CMD FETCH <C2> <file>
+        S->C2: 011 <kennel> <C1> <file>
+        [Acceptation]
+          C2->S: CMD ACCEPT_FETCH <C1> <file>
+          S->C1: 211 <C2> <file>
+        [Refusal]
+          C2->S: CMD REFUSE_FETCH <C1> <file>
+          S->C1: 311 <C2> <file>
+        [Bad command usage]
+          C: CMD <kennel> FETCH
+          S: 100 <kennel>
+
+      Description: 
+
+      Complementary informations: 
+
+    2.1.2.11 HELP 
       Arguments: 
 
       Restrictions: 
@@ -356,7 +398,20 @@ Table of Contents
       Description: 
 
       Complementary informations: 
-  
+
+    2.1.2.12 Unknown command 
+      Arguments: 
+
+      Restrictions: 
+
+      Formats:
+        C: CMD <kennel> <unkown cmd>
+        S: 404 <kennel>
+
+      Description: 
+
+      Complementary informations:
+
   /SNIFF         : List all connected clients
 
   /LICK <kennel> <name[,name2,...]>: Start/Invite a private kennel with the
@@ -396,24 +451,10 @@ Table of Contents
     
 
   2.2.10 /BITE command
-    C: CMD <kennel> BITE
-    [user is in a private kennel]
-      S: 010 <kennel> <C>
-    [user is not in a private kennel]
-      S: 110 <kennel> <C>
+    
 
   2.2.11 /FETCH command
-    C1: <kennel> CMD FETCH < C2> <file>
-    S->C2: 011 <kennel> <C1> <file>
-    [Acceptation]
-      C2->S: CMD ACCEPT_FETCH <C1> <file>
-      S->C1: 211 <C2> <file>
-    [Refusal]
-      C2->S: CMD REFUSE_FETCH <C1> <file>
-      S->C1: 311 <C2> <file>
-    [Bad command usage]
-      C: CMD <kennel> FETCH
-      S: 100 <kennel>
+    
 
 
   2.2.12 /HELP command
