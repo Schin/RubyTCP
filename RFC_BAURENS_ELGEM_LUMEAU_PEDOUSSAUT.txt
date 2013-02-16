@@ -63,21 +63,10 @@ Table of Contents
       1.3.3 Private kennels
 
   2. THE DNC SPECIFICATION
-    2.1 List of DNC commands 
-    2.2 Commands specifications
-      2.2.1 Simple message
-      2.2.2 /GO command    
-      2.2.3 /AFM command   
-      2.2.4 /BACK command  
-      2.2.5 /COLLAR command
-      2.2.6 /BARK command  
-      2.2.7 /PET command   
-      2.2.8 /SNIFF command 
-      2.2.9 /LICK command  
-      2.2.10 /BITE command 
-      2.2.11 /FETCH command
-      2.2.12 /HELP command 
-      2.2.13 Unknown command
+    2.1 Lists of DNC commands & codes
+      2.1.1 Returned codes
+      2.1.2 Commands
+    2.2 Simple messages
     2.3 Operating specifications
 
 1.  INTRODUCTION
@@ -120,11 +109,13 @@ Table of Contents
   to the others clients.
 
   Client interface shall display all received messages with the reception time.
-  A message is a sequence of characters (140 max) and ends with "\n\r".
+  A message is a sequence of characters (140 max) and ends with CRLF 
+  (Carriage Return/Line Feed).
 
 1.3 Kennels
 
   1.3.1 What is it ?
+
     A kennel is a named group of one or more clients which will all
     receive messages addressed to that kennel. Kennels are representated
     by a string containing up to eighteen (666*3/111) alphanumeric characters.
@@ -133,6 +124,7 @@ Table of Contents
     only designated clients.
 
   1.3.2 Public kennel
+
     1.3.2.1 Creation
       The main thread of discussion is created upon the start of the
       server (see up). It contains all the clients that are connected to
@@ -145,6 +137,7 @@ Table of Contents
       The kennel ceases to exist when the server stops.
 
   1.3.3 Private kennels
+
     1.3.3.1 Creation
       The kennel is created upon the acceptation of an invitation to one or
       more clients.
@@ -171,13 +164,14 @@ Table of Contents
 
   See below for more precisions on each code.
 
-  2.1.2  Commands
+  2.1.2 Commands
 
   The client dispose of a certain number of actions that are started by the
   use of a specific syntax. The format used by all client shall be "CMD" 
   followed by the current kennel name, followed by the command name and 
   possibles arguments. Each of these elements are to be separated by a single
   space.
+  Note that every commands are not case sensitive.
 
     2.1.2.1 GO
       Arguments: none
@@ -194,6 +188,11 @@ Table of Contents
       Complementary informations: 
         More advanced version may include an argument to display a custom 
         message to be displayed to other clients before disconnection.
+        The current version will ignore everything that may follow the word GO.
+
+                    ,              ,.==*Y;;=.,_            
+                     `*+,,.,,.==*` .w*``      "**-          
+                          ``"*===*"`   
 
     2.1.2.2 AFM 
       Arguments: none
@@ -213,8 +212,14 @@ Table of Contents
         signify to the others clients that he is not available and 
         may not participate to the discussions while in that state.
 
-      Complementary informations: none
+      Complementary informations:
+        More advanced version may include an argument to display a custom 
+        message.
+        The current version will ignore everything that may follow the word GO.
 
+                    ,              ,.==*Y;;=.,_            
+                     `*+,,.,,.==*` .w*``      "**-          
+                          ``"*===*"`   
 
     2.1.2.3 BACK 
       Arguments: none
@@ -234,8 +239,16 @@ Table of Contents
         It will also notify the others users that the client is now available.
 
       Complementary informations:
+        More advanced version may include an argument to display a custom 
+        message.
         More advanced version may implement other status and use this command
         to change back to the default status.
+        The current version will ignore everything that may follow the word 
+        BACK.
+
+                    ,              ,.==*Y;;=.,_            
+                     `*+,,.,,.==*` .w*``      "**-          
+                          ``"*===*"`   
 
     2.1.2.4 COLLAR 
       Arguments: name
@@ -261,6 +274,10 @@ Table of Contents
         More advanced version may forbid/reserve some usernames for various
         reasons.
 
+                    ,              ,.==*Y;;=.,_            
+                     `*+,,.,,.==*` .w*``      "**-          
+                          ``"*===*"`   
+
     2.1.2.5 BARK
       Arguments: message
 
@@ -278,6 +295,10 @@ Table of Contents
         a special transformation to the message. 
 
       Complementary informations: none
+
+                    ,              ,.==*Y;;=.,_            
+                     `*+,,.,,.==*` .w*``      "**-          
+                          ``"*===*"`   
 
     2.1.2.6 PET 
       Arguments: name
@@ -299,7 +320,11 @@ Table of Contents
 
       Complementary informations:
         More advanced version may include an argument to display a custom 
-        message to be displayed.
+        message.
+
+                    ,              ,.==*Y;;=.,_            
+                     `*+,,.,,.==*` .w*``      "**-          
+                          ``"*===*"`   
 
     2.1.2.7 SNIFF 
       Arguments: none
@@ -316,12 +341,17 @@ Table of Contents
         More advanced version may include an argument to specify the kennel or
         kennels.
 
-    2.1.2.8 LICK
-      Arguments:
-        a valid kennel name (doesn't already exist) and the username of an
-        other client.
+                    ,              ,.==*Y;;=.,_            
+                     `*+,,.,,.==*` .w*``      "**-          
+                          ``"*===*"`   
 
-      Restrictions: 
+    2.1.2.8 LICK
+      Arguments: kennel, name
+
+      Restrictions:
+        Client status must be different from AFM.
+        The username must correspond to an existing client.
+        The kennel name must be valid (18 alpha chars max).
 
       Formats:
         [Normal use]
@@ -344,127 +374,133 @@ Table of Contents
           S->C1: 100 <kennel>
 
       Description: 
+        Start/Invite a private kennel with the specified client(s). Note that 
+        the kennel is created if it doesn't already exist.
+        The choice of joining the private kennel is made by C2. 
+        In case of an acceptation, the kennel is created and C2 can chat on 
+        that kennel too. If the porposition is declined, C2 do not join 
+        the private kennel and C1 is notified of the refusal.
 
-      Complementary informations:
+      Complementary informations: none
+
+                    ,              ,.==*Y;;=.,_            
+                     `*+,,.,,.==*` .w*``      "**-          
+                          ``"*===*"`   
 
     2.1.2.9 BITE
       Arguments: none
 
       Restrictions:
-        May only be given when the client is in a private kennel
+        May only be given when the client is in a private kennel.
 
       Formats:
-        [user is in a private kennel]
+        [C is in a private kennel]
           C: CMD <kennel> BITE
           S: 010 <kennel> <C>
-        [user is not in a private kennel]
+        [C is not in a private kennel]
           C: CMD <kennel> BITE
           S: 110 <kennel> <C>
 
       Description: 
+        Leave the current private kennel.
 
-      Complementary informations: 
+      Complementary informations:
+        More advanced version may include an argument to display a custom 
+        message.
+        The current version will ignore everything that may follow the word 
+        BITE.
+
+                    ,              ,.==*Y;;=.,_            
+                     `*+,,.,,.==*` .w*``      "**-          
+                          ``"*===*"`   
 
     2.1.2.10 FETCH 
-      Arguments:
-        a valid username and a file which may refer to a file with read right
+      Arguments: file_infos, port, name
+        
       Restrictions: 
+        The file must be a valid file (exists and have enough right).
+        The name must correspond to an existing client.
+        Port must be a valid port number (between 1 and 65535).
 
       Formats:
-        C1: <kennel> CMD FETCH <C2> <file>
-        S->C2: 011 <kennel> <C1> <file>
+        C1: <kennel> CMD FETCH <C2> <port> <file_infos>
+        S->C2: 011 <kennel> <C1> <port> <file_infos>
         [Acceptation]
-          C2->S: CMD ACCEPT_FETCH <C1> <file>
-          S->C1: 211 <C2> <file>
+          C2->S: CMD ACCEPT_FETCH <C1> <file_infos>
+          S->C1: 211 <C2> <file_infos>
+          [Communication impossible]
+          C1->S: 111 <C2> <file_infos>
+          S->C2: 111 <C1> <file_infos>
+          [Invalid file]
+          C1->C2: 112 <file_infos>
         [Refusal]
-          C2->S: CMD REFUSE_FETCH <C1> <file>
-          S->C1: 311 <C2> <file>
+          C2->S: CMD REFUSE_FETCH <C1> <file_infos>
+          S->C1: 311 <C2> <file_infos>
         [Bad command usage]
           C: CMD <kennel> FETCH
           S: 100 <kennel>
 
-      Description: 
+      Description:
+        Ask a specified client to initiate a file transfer.
 
-      Complementary informations: 
+      Complementary informations:
+        In case C1 can't establish a communication with C2, C1 sends a message 
+        to the server with the code 111 to inform the other client of the 
+        communication failure. Upon the acceptation of the second client, the 
+        client hosting the file must check if the file is valid and send the 
+        code 112 along with the file informations if the file appear to 
+        be invalid.
+
+                    ,              ,.==*Y;;=.,_            
+                     `*+,,.,,.==*` .w*``      "**-          
+                          ``"*===*"`   
 
     2.1.2.11 HELP 
-      Arguments: 
+      Arguments: none
 
-      Restrictions: 
+      Restrictions: none
 
       Formats:
-        
+        C: CMD <kennel> HELP
+        S: 012 <kennel> <CMD1[,CMD2,CMD3,...]>
 
-      Description: 
+      Description:
+        Return the list of the commands available on the server that are not
+        the ones listed above. (This include modified version of the previous
+        commands).
 
-      Complementary informations: 
+      Complementary informations: none
+
+                    ,              ,.==*Y;;=.,_            
+                     `*+,,.,,.==*` .w*``      "**-          
+                          ``"*===*"`   
 
     2.1.2.12 Unknown command 
-      Arguments: 
+      Arguments: /
 
-      Restrictions: 
+      Restrictions: /
 
       Formats:
         C: CMD <kennel> <unkown cmd>
-        S: 404 <kennel>
+        S: 404 <kennel> <unkown cmd>
 
-      Description: 
+      Description:
+        Every command that is not recognize by a server shall be returned with
+        the code 404.
 
-      Complementary informations:
+      Complementary informations: none
 
-  /SNIFF         : List all connected clients
 
-  /LICK <kennel> <name[,name2,...]>: Start/Invite a private kennel with the
-                    specified client(s). Note that the kennel is created if 
-                    it doesn't already exist.
+2.2 Simple messages
 
-  /BITE          : Leave the private kennel.
-
-  /FETCH < username> <file>: Send a file to the specified client.
+  The format used by all client shall be "MSG" followed by the string entered
+  by the client. That string shall be stripped of all space characters that 
+  that preceed the first non space character or follow the last non space
+  character. The message ends with CRLF (Carriage Return/Line Feed)
   
-  /HELP          : Send the list of commands.
-
-  Note that all the commands are not case sensitive.
-
-
-2.2 Commands specifications
-
-  The following describes the format in which messages are sent and receive 
-  between the clients and the server.
-
-  Note that, in the current version, everything that may follow status commands 
-  (e.g.: GO, AFM, BITE,...) and the HELP command will be ignored by the server.   
-
-  2.2.1 Simple message
-    C: MSG <kennel> <message>
-    S: 000 <kennel> <message>
-
-
-  2.2.7 /PET command
-    
-
-  2.2.8 /SNIFF command
-    C: CMD <kennel> SNIFF
-    S: 008 <kennel> <C1[,C2,C3,...]>
-
-  2.2.9 /LICK command
-    
-
-  2.2.10 /BITE command
-    
-
-  2.2.11 /FETCH command
-    
-
-
-  2.2.12 /HELP command
-    C: CMD <kennel> HELP
-    S: 012 <kennel> <CMD1[,CMD2,CMD3,...]>
-
-  2.2.13 Unknown command
-    C: CMD <kennel> <unkown cmd>
-    S: 404 <kennel>
-
+  Format :
+      C: MSG <kennel> <message>
+      S: 000 <kennel> <message>
 
 2.3 Operating specifications
 
@@ -476,7 +512,8 @@ Server: Process messages data on the key word (CMD/MSG)
 Restrictions:
   username: alphanum
   kennel: alphanum
-  message: can contain up to 140 characters. End with "\n\r".
+  message: can contain up to 140 characters. End with CRLF 
+  (Carriage Return/Line Feed).
   file: considered as Bytes
 
 File transfert protocol: TCP 
@@ -485,6 +522,10 @@ connections with UDP, but you have to implement your own flow control
 and reliability algorithms. On the other hand, TCP P2P connections seem 
 very tricky to setup and aren’t supported on many routers but TCP provides 
 greater security in the transfert as it is more reliable than UDP.
+
+For the file transfert, the file will be considered as Bytes and send by TCP 
+connection between the 2 clients through their respective ips and ports
+selected during the acceptance procedure of transfert (see the FETCH command).
     __         __ _                    
    / /   ___  / /( )_____   ____ _____ 
   / /   / _ \/ __/// ___/  / __ `/ __ \
