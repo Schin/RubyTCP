@@ -2,13 +2,13 @@ require 'socket'
 require "./config_server.rb"
 
 class DNCServer
-	def initialize (port, verbose=false, errors=true, timeout=2)
+	def initialize (port=PORT, verbose=VERBOSE, errors=ERRORS, timeout=TIMEOUT, domain=DOMAIN)
 		#On fait un Hash contenant : Nom du kennel => tableau d'users
 		@kennels = Hash.new
 		#On stock tous les users dès leur connection dans le kennel public
 		@kennels["Public"] = Kennel.new("Public")
 		#On set le socket TCP du serveur
-		@server = TCPServer.new("", port)
+		@server = TCPServer.new(domain, port)
 
 		#talking mode
 		@verbose = verbose
@@ -92,7 +92,7 @@ class DNCServer
     end
 
 	def stop
-		broadcast(@kennels["Public"], "666 Server shuting down...", nil)
+		broadcast(@kennels["Public"], C666, nil)
 	    @server.close
 	    puts "Server off"
 	    exit!(0)
