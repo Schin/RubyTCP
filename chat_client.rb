@@ -10,6 +10,10 @@ class DNC_Client
 		@chat_client.puts username
 	end
 	def run
+		trap(:SIGINT) {
+      		puts "I'm off !"
+      		stop
+    	}
 		@pid = fork do
 		   loop do
 		       res_mess = @chat_client.recvfrom(TAILLE_TAMPON)[0].chomp
@@ -42,6 +46,8 @@ class DNC_Client
 		when "666"
 			puts data
 			stop
+		else
+			puts type+data
 		end
 	end
 end

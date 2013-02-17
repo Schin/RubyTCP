@@ -1,4 +1,5 @@
 require 'socket'
+require "./config_server.rb"
 
 class DNCServer
 	def initialize (port, verbose=false, errors=true, timeout=2)
@@ -15,7 +16,7 @@ class DNCServer
 		@errors  = errors
 
 		@timeout = timeout
-		@verbose and puts "Dogs Now Chat started on port #{port}"
+		@verbose and puts START+"#{port}"
 	end
 
 	def run
@@ -26,11 +27,12 @@ class DNCServer
 			if sock = get_socket
 				# a message has arrived, it must be read from sock
 				message = sock.gets( "\r\n" ).chomp( "\r\n" )
+				msg = message.split(" ")
 				# arbitrary examples how to handle incoming messages:
-				if message == 'quit'
-					raise SystemExit
-				elsif message =~ /^puts (.*)$/
-					puts "message from #{sock.peeraddr.join(':')}: '#{$1}'"
+				if msg[0] == "CMD"
+					puts "Command !"
+				elsif msg[0] == "MSG"
+					puts "Message incoming !"
 				elsif message =~ /^echo (.*)$/
 					# send something back to the client
 					sock.write( "server echo: '#{$1}'\r\n" )
@@ -62,6 +64,7 @@ class DNCServer
             @kennels["Public"].delete(sock)
             @errors and puts "socket #{sock.peeraddr.join(':')} had error"
         end
+
         # accept new clients
         ios[0].each do |s| 
             # loop runs over server and connections; here we look for the former
@@ -69,6 +72,7 @@ class DNCServer
             accept_new_connection or
                @errors and puts "server: incoming connection, but no client"
         end
+
         # process input from existing client
         ios[0].each do |s|
             # loop runs over server and connections; here we look for the latter
@@ -80,14 +84,15 @@ class DNCServer
                 @kennels["Public"].delete(s)
                 next
             end
+
             return s # message can be read from this
         end
+
         return nil # no message arrived
     end
 
-
 	def stop
-		broadcast_string(@kennels["Public"], "666 Server shuting down...")
+		broadcast(@kennels["Public"], "666 Server shuting down...", nil)
 	    @server.close
 	    puts "Server off"
 	    exit!(0)
