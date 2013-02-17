@@ -26,16 +26,17 @@ class DNCServer
 		trap(:SIGINT) {
       		stop
     	}
-		loop do
-			if sock = get_socket
+		loop do 
+			if sock = get_socket 
 				# a message has arrived, it must be read from sock
 				message = sock.gets( "\r\n" ).chomp( "\r\n" )
-				msg = message.split(" ")
+				puts message
+				type, data = message.split(" ",2)
 				# arbitrary examples how to handle incoming messages:
-				if msg[0] == "CMD"
-					puts "Command !"
-				elsif msg[0] == "MSG"
-					puts "Message incoming !"
+				if type == "CMD"
+					command_processing(data, sock)
+				elsif type == "MSG"
+					message_processing(data, sock)
 				elsif message =~ /^echo (.*)$/
 					# send something back to the client
 					sock.write( "server echo: '#{$1}'\r\n" )
@@ -71,9 +72,9 @@ class DNCServer
         # accept new clients
         ios[0].each do |s| 
             # loop runs over server and connections; here we look for the former
-            s==server or next 
-            accept_new_connection or
-               errors and puts "server: incoming connection, but no client"
+            s==server or next
+            accept = accept_new_connection
+           	puts "server: incoming connection, but no client" if errors and not accept
         end
 
         # process input from existing client
@@ -84,7 +85,9 @@ class DNCServer
             # by @server.accept, hence a TcpSocket < IPSocket < BaseSocket
             if s.eof?
                 # client has closed connection
+                user = kennels["Public"].get_user_sock(s)
                 kennels["Public"].delete(s)
+                broadcast(kennels["Public"], "000 Disconnection : #{user.name}")
                 next
             end
 
@@ -95,23 +98,61 @@ class DNCServer
     end
 
 	def stop
-		broadcast(kennels["Public"], C666, nil)
+		puts C666
+		broadcast(kennels["Public"], C666)
 	    @server.close
 	    puts "Server off"
 	    exit!(0)
 	end
 
-	def broadcast(kennel, message, sender)
+	def command_processing(data, sock)
+		kennel, cmd, params = data.split(" ", 3)
+		case cmd
+		when "GO", "go"
+			puts "go"
+		when "AFM", "afm"
+			puts "afm"
+		when "BACK", "back"
+			puts "back"
+		when "COLLAR", "collar"
+			puts "collar"
+		when "BARK", "bark"
+			puts "bark"
+		when "PET","pet"
+			puts "pet"
+		when "SNIFF", "sniff"
+			puts "sniff"
+		when "LICK", "lick"
+			puts "lick"
+		when "BITE", "bite"
+			puts "bite"
+		when "FETCH", "fetch"
+			puts "fetch"
+		when "HELP", "help"
+			puts "help"
+		else
+
+		end
+	end
+	def message_processing(data, sock)
+		kennel, message = data.split(" ", 2)
+		user = kennels["Public"].get_user_sock(sock)
+		broadcast(kennels[kennel], "000 [#{user.name}] : " + message)
+	end
+
+	def broadcast(kennel, message)
 		kennel.users.each { |key, value|
-			value.socket.puts sender.name + message if key != "unknown"
+			value.socket.puts kennel.name + " " + message if key != "unknown"
 		}
 		#Save dans logs
 	end
-
+	def respond(user_sock, message)
+		user_sock.puts message
+	end
 	def accept_new_connection
 	    new_sock = @server.accept
 
-	    new_sock.puts "000 You're connected to Dogs Now Chat server."
+	    new_sock.puts "000 Public You're connected to Dogs Now Chat server."
 
 	    #LOG : puts sprintf("Client joined %s:%s\n", newsock.peeraddr[2], newsock.peeraddr[1]))
 		new_user = User.new(new_sock)
@@ -122,7 +163,7 @@ class DNCServer
 		rescue Exception
 			return false
 		end
-
+		
 		while (err = username_validator(new_name)) != 0 do
 			errors and puts "New connection : Invalid username #{new_name} (#{err})"
 			new_user.socket.puts "105 Public #{new_name}" if err == 1
@@ -133,12 +174,12 @@ class DNCServer
 		    	return false
 		    end
 		end
-
+		puts "New user connected : #{new_name} #{new_sock.peeraddr[2]}:#{new_sock.peeraddr[1]}" 
 		new_user.name = new_name
 
 	    kennels["Public"].users[new_name] = new_user
 	    str = "004 Public unknown #{new_name}"
-	    broadcast(kennels["Public"], str, new_user)
+	    broadcast(kennels["Public"], str)
 	    return true
   	end
 
@@ -187,6 +228,11 @@ class DNCServer
 		def delete(sock)
 			users.each { |key, value|
 				users.delete(key) if key != "unknown" and value.socket == sock
+			}
+		end
+		def get_user_sock(sock)
+			users.each { |key, value|
+				return value if key != "unknown" and value.socket == sock
 			}
 		end
 	end

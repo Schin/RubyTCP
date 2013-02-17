@@ -17,16 +17,16 @@ class DNC_Client
 		@pid = fork do
 		   loop do
 		       res_mess = @chat_client.recvfrom(TAILLE_TAMPON)[0].chomp
-		       type, data = res_mess.split(" ",2)
-		       display(type, data)
+		       kennel, type, data = res_mess.split(" ",3)
+		       data_processing(type, kennel, data)
 		   end
 		end
 		begin
 			while line = gets do
-				if line.match(/^\//) then
-      				@chat_client.puts "CMD "+line[1..-1].strip
+				if /^\//.match(line) then
+      				@chat_client.puts "CMD Public "+line[1..-1].strip + "\r\n"
     			else
-    				@chat_client.puts "MSG "+line.strip
+    				@chat_client.puts "MSG Public "+line.strip + "\r\n"
 				end
 			end
 		rescue Exception
@@ -37,17 +37,19 @@ class DNC_Client
 		@chat_client.close
 		exit!(0)
 	end
-	def display(type, data)
+	def data_processing(type, kennel, data)
 		case type
 		when "000"
 			puts data
+		when "004"
+			puts "Good pseudo man !"
 		when "111"
 			puts data
 		when "666"
 			puts data
 			stop
 		else
-			puts type+data
+			puts data
 		end
 	end
 end
