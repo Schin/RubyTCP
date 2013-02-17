@@ -143,7 +143,7 @@ class DNCServer
   	end
 
   	def username_validator(username)
-  		return 1 if /^[a-zA-Z0-9]{3,12}$/.match(username) 
+  		return 1 if !/^[a-zA-Z0-9]{3,12}$/.match(username) 
 		kennels["Public"].users[username] ? 2 : 0
   	end
 
