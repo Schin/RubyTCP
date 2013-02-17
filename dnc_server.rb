@@ -2,6 +2,9 @@ require 'socket'
 require "./config_server.rb"
 
 class DNCServer
+
+	attr_accessor :kennels, :server, :verbose, :errors, :timeout
+
 	def initialize (port=PORT, verbose=VERBOSE, errors=ERRORS, timeout=TIMEOUT, domain=DOMAIN)
 		#On fait un Hash contenant : Nom du kennel => tableau d'users
 		@kennels = Hash.new
@@ -37,7 +40,7 @@ class DNCServer
 					# send something back to the client
 					sock.write( "server echo: '#{$1}'\r\n" )
 				else
-					puts "unexpected message from #{sock.peeraddr}: '#{$1}'"
+					puts "unexpected message from #{sock}: '#{$1}'"
 				end
 			else
 				sleep 0.01 # free CPU for other jobs, humans won't notice this latency
@@ -54,34 +57,34 @@ class DNCServer
         # and they can respond with write().
 
         # one select call for three different purposes -> saves timeouts
-        connections = @kennels["Public"].sockets
+        connections = kennels["Public"].sockets
 
- 		ios = select( [@server]+connections, nil, connections, @timeout ) or
+ 		ios = select([server]+connections, nil, connections, timeout) or
             return nil
         # disconnect any clients with errors
         ios[2].each do |sock|
             sock.close
-            @kennels["Public"].delete(sock)
-            @errors and puts "socket #{sock.peeraddr.join(':')} had error"
+            kennels["Public"].delete(sock)
+            errors and puts "socket #{sock.peeraddr.join(':')} had error"
         end
 
         # accept new clients
         ios[0].each do |s| 
             # loop runs over server and connections; here we look for the former
-            s==@server or next 
+            s==server or next 
             accept_new_connection or
-               @errors and puts "server: incoming connection, but no client"
+               errors and puts "server: incoming connection, but no client"
         end
 
         # process input from existing client
         ios[0].each do |s|
             # loop runs over server and connections; here we look for the latter
-            s==@server and next
+            s==server and next
             # since s is an element of @kennels["Public"].sockets, it is a client created
             # by @server.accept, hence a TcpSocket < IPSocket < BaseSocket
             if s.eof?
                 # client has closed connection
-                @kennels["Public"].delete(s)
+                kennels["Public"].delete(s)
                 next
             end
 
@@ -92,7 +95,7 @@ class DNCServer
     end
 
 	def stop
-		broadcast(@kennels["Public"], C666, nil)
+		broadcast(kennels["Public"], C666, nil)
 	    @server.close
 	    puts "Server off"
 	    exit!(0)
@@ -121,6 +124,7 @@ class DNCServer
 		end
 
 		while err = username_validator(new_name) != 0 do
+			errors and puts "New connection : Invalid username #{new_name}"
 			new_user.socket.puts "105 Public #{new_name}" if err == 1
 			new_user.socket.puts "104 Public #{new_name}" if err == 2
 		    begin
@@ -132,15 +136,15 @@ class DNCServer
 
 		new_user.name = new_name
 
-	    @kennels["Public"].users[new_name] = new_user
+	    kennels["Public"].users[new_name] = new_user
 	    str = "004 Public unknown #{new_name}"
-	    broadcast(@kennels["Public"], str, new_user)
+	    broadcast(kennels["Public"], str, new_user)
 	    return true
   	end
 
   	def username_validator(username)
   		return 1 if username.match(/regexpduZboob/) 
-		@kennels["Public"].users[username] ? 2 : 0
+		kennels["Public"].users[username] ? 2 : 0
   	end
 
 	class User
@@ -154,11 +158,11 @@ class DNCServer
 		end
 
 		def ip
-			@socket.peeraddr[2].to_s
+			socket.peeraddr[2].to_s
 		end
 
 		def port
-			@socket.peeraddr[1].to_s
+			socket.peeraddr[1].to_s
 		end
 
 	end
@@ -175,14 +179,14 @@ class DNCServer
 
 		def sockets
 			res = []
-			@users.each { |key, value|
+			users.each { |key, value|
 				res.push value.socket if key != "unknown"
 			}
 			return res
 		end
 		def delete(sock)
-			@users.each { |key, value|
-				@users.delete(key) if key != "unknown" and value.socket == sock
+			users.each { |key, value|
+				users.delete(key) if key != "unknown" and value.socket == sock
 			}
 		end
 	end
