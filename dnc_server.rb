@@ -123,8 +123,8 @@ class DNCServer
 			return false
 		end
 
-		while err = username_validator(new_name) != 0 do
-			errors and puts "New connection : Invalid username #{new_name}"
+		while (err = username_validator(new_name)) != 0 do
+			errors and puts "New connection : Invalid username #{new_name} (#{err})"
 			new_user.socket.puts "105 Public #{new_name}" if err == 1
 			new_user.socket.puts "104 Public #{new_name}" if err == 2
 		    begin
@@ -143,7 +143,7 @@ class DNCServer
   	end
 
   	def username_validator(username)
-  		return 1 if username.match(/regexpduZboob/) 
+  		return 1 if /^[a-zA-Z0-9]{3,12}$/.match(username) 
 		kennels["Public"].users[username] ? 2 : 0
   	end
 
