@@ -1,13 +1,15 @@
 require "socket"
 
-DOMAIN = "localhost"
-PORT = 2626
 TAILLE_TAMPON = 1000
 
+TIMEOUT = 10
+DOMAIN = "localhost"
+PORT = 2626
+
+
 class DNC_Client
-	def initialize(domaine, port, username)
+	def initialize(domaine, port)
 		@chat_client = TCPSocket.new(domaine, port)
-		@chat_client.puts username
 	end
 	def run
 		trap(:SIGINT) {
@@ -17,7 +19,7 @@ class DNC_Client
 		@pid = fork do
 		   loop do
 		       res_mess = @chat_client.recvfrom(TAILLE_TAMPON)[0].chomp
-		       kennel, type, data = res_mess.split(" ",3)
+		       type, kennel, data = res_mess.split(" ",3)
 		       data_processing(type, kennel, data)
 		   end
 		end
@@ -48,11 +50,11 @@ class DNC_Client
 		when "666"
 			puts data
 			stop
+		when "0"
+			puts "OFF"
 		else
 			puts data
 		end
 	end
 end
-print "Enter your username: "
-username = gets.chomp
-client = DNC_Client.new(DOMAIN, PORT, username).run
+client = DNC_Client.new(DOMAIN, PORT).run

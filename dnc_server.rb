@@ -12,7 +12,8 @@ class DNCServer
 		@kennels["Public"] = Kennel.new("Public")
 		#On set le socket TCP du serveur
 		@server = TCPServer.new(domain, port)
-
+		#compteur de génération des noms
+		@cpt_name = 0
 		#talking mode
 		@verbose = verbose
 		#errors mode
@@ -26,11 +27,11 @@ class DNCServer
 		trap(:SIGINT) {
       		stop
     	}
-		loop do 
+		loop do
+			@cpt_name = 0 if @cpt_name >= 99999999
 			if sock = get_socket 
 				# a message has arrived, it must be read from sock
 				message = sock.gets( "\r\n" ).chomp( "\r\n" )
-				puts message
 				type, data = message.split(" ",2)
 				# arbitrary examples how to handle incoming messages:
 				if type == "CMD"
@@ -87,7 +88,7 @@ class DNCServer
                 # client has closed connection
                 user = kennels["Public"].get_user_sock(s)
                 kennels["Public"].delete(s)
-                broadcast(kennels["Public"], "000 Disconnection : #{user.name}")
+                broadcast("000", kennels["Public"], "Disconnection : #{user.name}")
                 next
             end
 
@@ -98,13 +99,13 @@ class DNCServer
     end
 
 	def stop
-		puts C666
-		broadcast(kennels["Public"], C666)
+		puts M666
+		broadcast("666", kennels["Public"], M666)
 	    @server.close
 	    puts "Server off"
 	    exit!(0)
 	end
-
+	
 	def command_processing(data, sock)
 		kennel, cmd, params = data.split(" ", 3)
 		case cmd
@@ -136,13 +137,15 @@ class DNCServer
 	end
 	def message_processing(data, sock)
 		kennel, message = data.split(" ", 2)
-		user = kennels["Public"].get_user_sock(sock)
-		broadcast(kennels[kennel], "000 [#{user.name}] : " + message)
+		if(message != "")
+			user = kennels["Public"].get_user_sock(sock)
+			broadcast("000", kennels[kennel], "[#{user.name}] : " + message)
+		end
 	end
 
-	def broadcast(kennel, message)
+	def broadcast(type, kennel, message)
 		kennel.users.each { |key, value|
-			value.socket.puts kennel.name + " " + message if key != "unknown"
+			value.socket.puts type + " " + kennel.name + " " + message if key != "unknown"
 		}
 		#Save dans logs
 	end
@@ -152,34 +155,33 @@ class DNCServer
 	def accept_new_connection
 	    new_sock = @server.accept
 
-	    new_sock.puts "000 Public You're connected to Dogs Now Chat server."
-
 	    #LOG : puts sprintf("Client joined %s:%s\n", newsock.peeraddr[2], newsock.peeraddr[1]))
 		new_user = User.new(new_sock)
-		new_name = "unknown"
+		new_name = "dog" + @cpt_name.to_s
 
-		begin
-			new_name = new_user.socket.gets().chomp
-		rescue Exception
-			return false
-		end
-		
-		while (err = username_validator(new_name)) != 0 do
-			errors and puts "New connection : Invalid username #{new_name} (#{err})"
-			new_user.socket.puts "105 Public #{new_name}" if err == 1
-			new_user.socket.puts "104 Public #{new_name}" if err == 2
-		    begin
-		    	new_name = new_user.socket.gets().chomp
-		    rescue Exception
-		    	return false
-		    end
-		end
+		#begin
+		#	new_name = new_user.socket.gets().chomp
+		#rescue Exception
+		#	return false
+		#end
+		#
+		#while (err = username_validator(new_name)) != 0 do
+		#	errors and puts "New connection : Invalid username #{new_name} (#{err})"
+		#	new_user.socket.puts "105 Public #{new_name}" if err == 1
+		#	new_user.socket.puts "104 Public #{new_name}" if err == 2
+		#    begin
+		#    	new_name = new_user.socket.gets().chomp
+		#    rescue Exception
+		#    	return false
+		#    end
+		#end
 		puts "New user connected : #{new_name} #{new_sock.peeraddr[2]}:#{new_sock.peeraddr[1]}" 
 		new_user.name = new_name
 
 	    kennels["Public"].users[new_name] = new_user
 	    str = "004 Public unknown #{new_name}"
-	    broadcast(kennels["Public"], str)
+	    respond(new_user.socket, str)
+	    @cpt_name += 1
 	    return true
   	end
 
