@@ -67,7 +67,6 @@ class DNCServer
         ios[2].each do |sock|
             sock.close
             kennels["Public"].delete(sock)
-            errors and puts "socket #{sock.peeraddr.join(':')} had error"
         end
 
         # accept new clients
@@ -88,7 +87,8 @@ class DNCServer
                 # client has closed connection
                 user = kennels["Public"].get_user_sock(s)
                 kennels["Public"].delete(s)
-                broadcast("000", kennels["Public"], "Disconnection : #{user.name}")
+                puts "#{user.name} has left DNC" if @verbose
+                broadcast("000", kennels["Public"], "#{user.name} has left DNC")
                 next
             end
 
@@ -105,36 +105,93 @@ class DNCServer
 	    puts "Server off"
 	    exit!(0)
 	end
-	
 	def command_processing(data, sock)
 		kennel, cmd, params = data.split(" ", 3)
 		case cmd
-		when "GO", "go"
-			puts "go"
-		when "AFM", "afm"
-			puts "afm"
-		when "BACK", "back"
-			puts "back"
-		when "COLLAR", "collar"
-			puts "collar"
-		when "BARK", "bark"
-			puts "bark"
-		when "PET","pet"
-			puts "pet"
-		when "SNIFF", "sniff"
-			puts "sniff"
-		when "LICK", "lick"
-			puts "lick"
-		when "BITE", "bite"
-			puts "bite"
-		when "FETCH", "fetch"
-			puts "fetch"
-		when "HELP", "help"
-			puts "help"
-		else
+			when "GO", "go"
+				go(sock)
+			when "AFM", "afm"
+				afm(sock)
+			when "BACK", "back"
+				back(sock)
+			when "COLLAR", "collar"
+				collar(sock, params)
+			when "BARK", "bark"
+				puts "bark"
+			when "PET","pet"
+				puts "pet"
+			when "SNIFF", "sniff"
+				puts "sniff"
+			when "LICK", "lick"
+				puts "lick"
+			when "BITE", "bite"
+				puts "bite"
+			when "FETCH", "fetch"
+				puts "fetch"
+			when "HELP", "help"
+				puts "help"
+			else
 
 		end
 	end
+
+	def go(socket)
+		respond("001", socket, "")
+	end
+
+	def afm(socket)
+		user = kennels["Public"].get_user_sock(socket)
+		if user.status == "AFM" then
+			respond("101", socket, "How did you do that ? Aren't you already AFM ?")
+		else
+			user.status = "AFM"
+			broadcast("002", kennels["Public"], user.name)
+		end
+	end
+
+	def back(socket)
+		user = kennels["Public"].get_user_sock(socket)
+		if user.status == "connected" then
+			respond("102", socket, "Hum... you're already here...")
+		else
+			user.status = "connected"
+			broadcast("003", kennels["Public"], user.name)
+		end
+	end
+
+	def collar(socket, params)
+		user = kennels["Public"].get_user_sock(socket)
+		err = username_validator(params)
+		if err == 0 then
+			broadcast("004", kennels["Public"], user.name+" "+params)
+			user.name = params
+		else
+			respond("104", socket, "#{params}") if err == 1
+			respond("103", socket, "#{params}") if err == 2
+		end
+	end
+
+	def bark(socket)
+	end
+
+	def pet(socket)
+	end
+
+	def sniff(socket)
+	end
+
+	def lick(socket)
+	end
+
+	def bite(socket)
+	end
+
+	def fetch(socket)
+	end
+
+	def help(socket)
+	end
+
 	def message_processing(data, sock)
 		kennel, message = data.split(" ", 2)
 		if(message != "")
@@ -149,9 +206,11 @@ class DNCServer
 		}
 		#Save dans logs
 	end
-	def respond(user_sock, message)
-		user_sock.puts message
+
+	def respond(type, user_sock, message)
+		user_sock.puts type + " Self " + message
 	end
+
 	def accept_new_connection
 	    new_sock = @server.accept
 
@@ -179,8 +238,8 @@ class DNCServer
 		new_user.name = new_name
 
 	    kennels["Public"].users[new_name] = new_user
-	    str = "004 Public unknown #{new_name}"
-	    respond(new_user.socket, str)
+	    str = "unknown #{new_name}"
+	    respond("004",new_user.socket, str)
 	    @cpt_name += 1
 	    return true
   	end
@@ -207,7 +266,6 @@ class DNCServer
 		def port
 			socket.peeraddr[1].to_s
 		end
-
 	end
 
 	class Kennel
@@ -227,11 +285,13 @@ class DNCServer
 			}
 			return res
 		end
+
 		def delete(sock)
 			users.each { |key, value|
 				users.delete(key) if key != "unknown" and value.socket == sock
 			}
 		end
+
 		def get_user_sock(sock)
 			users.each { |key, value|
 				return value if key != "unknown" and value.socket == sock
