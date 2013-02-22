@@ -183,7 +183,7 @@ Table of Contents
 
       Formats:
         C: CMD <kennel> GO
-        S: 001 <C>
+        S->C: 001
 
       Description: 
         Cut connection with the server.
@@ -208,7 +208,7 @@ Table of Contents
         [client status: BACK]
           S: 002 <kennel> <C>
         [client status: AFM]
-          S->C: 102 <kennel>
+          S->C: 101 <kennel>
 
       Description:
         Meaning Away From Master, it changes the client status to 
@@ -235,7 +235,7 @@ Table of Contents
         [client status: AFM]
           S: 003 <kennel> <C>
         [client status: BACK]
-          S->C: 103 <kennel>
+          S->C: 102 <kennel>
 
       Description:
         Resume from AFM state to the default status. 
@@ -266,9 +266,12 @@ Table of Contents
         [free valid username]
           S: 004 <public_kennel> <old_username> <new_username>
         [already existing username]
-          S->C: 104 <kennel> <new_username>
+          S->C: 103 <kennel> <new_username>
         [invalid string for username]
-          S->C: 105 <kennel> <invalid_name>
+          S->C: 104 <kennel> <invalid_name>
+        [Bad command usage]
+          C: CMD <kennel> COLLAR 
+          S->C1: 100 <kennel>
 
       Description:
         Change the client username to the specified name. 
@@ -315,7 +318,10 @@ Table of Contents
         [C2 exists]
           S: 006 <kennel> <C1> <C2>
         [C2 doesn’t exist]
-          S->C1: 106 <kennel> <C2>
+          S->C1: 105 <kennel> <C2>
+        [Bad command usage]
+          C: CMD <kennel> PET 
+          S->C1: 100 <kennel>
 
       Description:
         Display on every kennel a message that signal the client pet the client
@@ -362,16 +368,16 @@ Table of Contents
           S->C2: 009 <kennel> <C1>
         [Acceptation]
           C2->S: CMD ACCEPT_LICK <C1>
-          S->C1: 209 <C2>
+          S->C1: 201 <C2>
         [Refusal]
           C2->S: CMD REFUSE_LICK <C1>
-          S->C1: 309 <C2>
+          S->C1: 301 <C2>
         [Already attributed kennel name]
           C: CMD <kennel> LICK <kennel1> <C2>
-          S: 109 <kennel1>
+          S: 106 <kennel1>
         [C2 does not exist]
           C: CMD <kennel> LICK <kennel1> <C2>
-          S: 109 <C2>
+          S: 107 <C2>
         [Bad command usage]
           C: CMD <kennel> LICK 
           S->C1: 100 <kennel>
@@ -402,7 +408,7 @@ Table of Contents
           S: 010 <kennel> <C>
         [C is not in a private kennel]
           C: CMD <kennel> BITE
-          S: 110 <kennel> <C>
+          S: 108 <kennel> <C>
 
       Description: 
         Leave the current private kennel.
@@ -430,15 +436,15 @@ Table of Contents
         S->C2: 011 <kennel> <C1> <port> <file_infos>
         [Acceptation]
           C2->S: CMD ACCEPT_FETCH <C1> <file_infos>
-          S->C1: 211 <C2> <file_infos>
+          S->C1: 202 <C2> <file_infos>
           [Communication impossible]
-          C1->S: 111 <C2> <file_infos>
-          S->C2: 111 <C1> <file_infos>
+          C1->S: 109 <C2> <file_infos>
+          S->C2: 109 <C1> <file_infos>
           [Invalid file]
-          C1->C2: 112 <file_infos>
+          C1->C2: 110 <file_infos>
         [Refusal]
           C2->S: CMD REFUSE_FETCH <C1> <file_infos>
-          S->C1: 311 <C2> <file_infos>
+          S->C1: 302 <C2> <file_infos>
         [Bad command usage]
           C: CMD <kennel> FETCH
           S: 100 <kennel>
