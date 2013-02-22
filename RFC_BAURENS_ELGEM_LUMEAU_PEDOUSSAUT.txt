@@ -164,6 +164,7 @@ Table of Contents
   2xx : signify that a request has been accepted
   3xx : signify that a request has been rejected
   4xx : request corresponding to nothing known
+  666 : Server shutting down
 
   See below for more precisions on each code.
 
@@ -272,6 +273,8 @@ Table of Contents
         [Bad command usage]
           C: CMD <kennel> COLLAR 
           S->C1: 100 <kennel>
+        [AFM status]
+          S->C:101 <kennel>
 
       Description:
         Change the client username to the specified name. 
@@ -295,6 +298,8 @@ Table of Contents
       Formats:
         C: CMD <kennel> BARK <message>
         S: 005 <kennel> <message>
+      [AFM status]
+          S->C:101 <kennel>
 
       Description:
         Send the specified message with a notification for the client to apply 
@@ -322,6 +327,8 @@ Table of Contents
         [Bad command usage]
           C: CMD <kennel> PET 
           S->C1: 100 <kennel>
+        [AFM status]
+          S->C:101 <kennel>
 
       Description:
         Display on every kennel a message that signal the client pet the client
@@ -341,10 +348,10 @@ Table of Contents
       Restrictions: none
 
       Formats: 
-        C: CMD <kennel> SNIFF [K1,K2,...]
+        C: CMD <kennel> SNIFF
         S: 008 <kennel> <C1[,C2,C3,...]>
 
-      Description: List all connected clients
+      Description: List all connected clients in the current kennel
 
       Complementary informations:
         More advanced version may include an argument to specify the kennel or
@@ -361,29 +368,35 @@ Table of Contents
         Client status must be different from AFM.
         The username must correspond to an existing client.
         The kennel name must be valid (18 alpha chars max).
+        If the kennel exists, the client must be member of it.
 
       Formats:
         [Normal use]
           C1: CMD <kennel> LICK <kennel1> <C2>
           S->C2: 009 <kennel> <C1>
         [Acceptation]
-          C2->S: CMD ACCEPT_LICK <C1>
-          S->C1: 201 <C2>
+          C2->S: CMD ACCEPT_LICK <kennel1> <C1> 
+          S->C1: 201 <kennel1> <C2> 
         [Refusal]
-          C2->S: CMD REFUSE_LICK <C1>
-          S->C1: 301 <C2>
-        [Already attributed kennel name]
+          C2->S: CMD REFUSE_LICK <kennel1> <C1> 
+          S->C1: 301 <kennel1> <C2> 
+        [Already attributed kennel name &
+         not member of the kennel]
           C: CMD <kennel> LICK <kennel1> <C2>
-          S: 106 <kennel1>
+          S->C1: 106 <kennel1>
         [C2 does not exist]
           C: CMD <kennel> LICK <kennel1> <C2>
           S: 107 <C2>
+        [Invalid kennel name]
+          S->C1: 111 <kennel> <kennel1>
         [Bad command usage]
           C: CMD <kennel> LICK 
           S->C1: 100 <kennel>
+        [AFM status]
+          S->C1: 101 <kennel>
 
       Description: 
-        Start/Invite a private kennel with the specified client(s). Note that 
+        Invite to/Start a private kennel with the specified client(s). Note that 
         the kennel is created if it doesn't already exist.
         The choice of joining the private kennel is made by C2. 
         In case of an acceptation, the kennel is created and C2 can chat on 
@@ -400,6 +413,7 @@ Table of Contents
       Arguments: none
 
       Restrictions:
+        Client status must be different from AFM.
         May only be given when the client is in a private kennel.
 
       Formats:
@@ -409,6 +423,8 @@ Table of Contents
         [C is not in a private kennel]
           C: CMD <kennel> BITE
           S: 108 <kennel> <C>
+        [AFM status]
+          S->C:101 <kennel>
 
       Description: 
         Leave the current private kennel.
@@ -426,7 +442,8 @@ Table of Contents
     2.1.2.10 FETCH 
       Arguments: file_infos, port, name
         
-      Restrictions: 
+      Restrictions:
+        Client status must be different from AFM. 
         The file must be a valid file (exists and have enough right).
         The name must correspond to an existing client.
         Port must be a valid port number (between 1 and 65535).
@@ -448,6 +465,8 @@ Table of Contents
         [Bad command usage]
           C: CMD <kennel> FETCH
           S: 100 <kennel>
+        [AFM status]
+          S->C:101 <kennel> 
 
       Description:
         Ask a specified client to initiate a file transfer.
@@ -499,7 +518,6 @@ Table of Contents
 
       Complementary informations: none
 
-
 2.2 Simple messages
 
   The format used by all client shall be "MSG" followed by the string entered
@@ -507,6 +525,8 @@ Table of Contents
   that preceed the first non space character or follow the last non space
   character. The message ends with CRLF (Carriage Return/Line Feed)
   
+  Restrictions : 140 chars max, client status must be different from AFM.
+
   Format :
       C: MSG <kennel> <message>
       S: 000 <kennel> <message>
