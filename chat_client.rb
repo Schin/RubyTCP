@@ -4,7 +4,7 @@ require "thread"
 TAILLE_TAMPON = 1000
 
 TIMEOUT = 10
-DOMAIN = "172.31.190.131"
+DOMAIN = "localhost"
 PORT = 2626
 
 

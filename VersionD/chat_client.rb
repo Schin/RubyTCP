@@ -49,7 +49,12 @@ class DNC_Client
 		case type
 			#--- 0XX: Valid return ---#
 			when "000" # Message
-				puts data
+				name, msg = data.split(" ",2)
+				if name == "!" then
+					puts msg
+				else
+					puts "["+name+"]: "+msg
+				end
 			when "001" # GO
 				puts "Bye !"
 				stop
@@ -105,29 +110,33 @@ class DNC_Client
 				end
 			when "011" # FETCH
 			when "012" # HELP
+			when "013" # YAP
+				name, msg = data.split(" ",2)
+				puts name+"->"+msg
 			#--- 1XX: Error return ---#
 			when "100" # BAD COMMAND USAGE
 				puts "BAD COMMAND USAGE" + data
 			when "101" # AFM
-				puts "You are AFM you need to use /BACK."
+				puts "You are currently AFM you need to use /BACK."
 			when "102" # BACK
-				puts "BACK" + data
+				puts data
 			when "103" # COLLAR already exists
-				puts "COLLAR already exists" + data
+				puts data+" is already written on a dog collar"
 			when "104" # COLLAR invalid
-				puts "COLLAR invalid" + data
-			when "105" # PET
-				puts "PET" + data
-			when "106" # LICK kennel already exists
-				puts "LICK kennel already exists" + data
-			when "107" # LICK user-name does not exist
-				puts "LICK user-name does not exist" + data
-			when "108" # BITE
-				puts "You're in public kennel, use /GO if you want leave the chat."
-			when "109" # FETCH impossible communication 
-				puts "FETCH impossible communication " + data
-			when "110" # FETCH invalid file
-				puts "FETCH invalid file" + data
+				puts data+" is not a proper dog name. Your master will never call you that !"
+			when "105" # non existant username
+				puts "I'm affraid " + data + " is not among us..."
+			when "106" # LICK kennel already exists + not a member
+				puts data+" already hosts some dogs. Try another name or become a member of "+data
+			when "107" # Already in private kennel
+				puts "You're in a public kennel, use /GO if you want leave the chat."
+			when "108" # FETCH impossible communication
+				name, file = data.split(" ",2)
+				puts name+" did not succeeded in establishing a communication to transfer "+file
+			when "109" # FETCH invalid file
+				puts data+" is an invalid file"
+			when "110" # Invalid kennel
+				puts data + " is an invalid kennel name. Moreover I don't think many dogs would like a kennel with that kind of name !"
 			#--- 2XX: Accept return ---#
 			when "201" # Accept LICK
 			when "202" # Accept FETCH
@@ -136,7 +145,7 @@ class DNC_Client
 			when "302" # Refuse FETCH
 			#--- 4XX: Other return ---#	
 			when "404" # Unknown command
-				puts "Command not found"
+				puts "Interesting command. It's a shame we don't know it !"
 			when "666" # Server shutting down
 				puts data
 				stop

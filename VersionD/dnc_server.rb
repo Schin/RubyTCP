@@ -37,10 +37,12 @@ class DNCServer
 				if type == "CMD"
 					command_processing(data, sock)
 				elsif type == "MSG"
-					message_processing(data, sock)
-				elsif message =~ /^echo (.*)$/
-					# send something back to the client
-					sock.write( "server echo: '#{$1}'\r\n" )
+					user = kennels["Public"].get_user_by_sock(sock)
+					if user.status != "AFM" then
+						message_processing(data, sock)
+					else
+						respond("101", sock, "")
+					end
 				else
 					puts "unexpected message from #{sock}: '#{$1}'"
 				end
@@ -74,7 +76,7 @@ class DNCServer
             s==server or next
             accept = accept_new_connection
             if accept then
-            	broadcast("000", kennels["Public"],accept+" is now connected")
+            	broadcast("000", kennels["Public"], "! "+accept+" is now connected")
             else
            		puts "server: incoming connection, but no client" if errors
            	end
@@ -91,7 +93,7 @@ class DNCServer
                 user = kennels["Public"].get_user_by_sock(s)
                 kennels["Public"].delete(s)
                 puts "#{user.name} has left DNC" if @verbose
-                broadcast("000", kennels["Public"], "#{user.name} has left DNC")
+                broadcast("000", kennels["Public"], "! #{user.name} has left DNC")
                 next
             end
 
@@ -188,8 +190,8 @@ class DNCServer
 		if err == 0 then
 			broadcast("004", kennels["Public"], user.name+" "+name)
 			kennels["Public"].delete(socket)
-			kennels["Public"].users[name] = user
 			user.name = name
+			kennels["Public"].users[name] = user
 		else
 			respond("104", socket, name) if err == 1
 			respond("103", socket, name) if err == 2
@@ -363,14 +365,14 @@ class DNCServer
 			return
 		end
 
-		respond("013", name, msg)
+		respond("013", target.socket, target.name+" "+msg)
 	end
 
 	def message_processing(data, sock)
 		kennel, message = data.split(" ", 2)
 		if(message != "")
 			user = kennels["Public"].get_user_by_sock(sock)
-			broadcast("000", kennels[kennel], "[#{user.name}] : " + message)
+			broadcast("000", kennels[kennel], user.name+ " " +message)
 		end
 	end
 
@@ -408,7 +410,7 @@ class DNCServer
   	end
 
   	def kennelname_validator(name)
-  		return 1 if !/^[a-zA-Z0-9]{3,18}$/.match(username) 
+  		return 1 if !/^[a-zA-Z0-9]{3,18}$/.match(name) 
 		kennels[name] ? 2 : 0
   	end
 

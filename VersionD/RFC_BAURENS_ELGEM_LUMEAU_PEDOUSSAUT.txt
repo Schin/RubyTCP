@@ -386,9 +386,9 @@ Table of Contents
           S->C1: 106 <kennel1>
         [C2 does not exist]
           C: CMD <kennel> LICK <kennel1> <C2>
-          S: 107 <C2>
+          S: 105 <kennel> <C2>
         [Invalid kennel name]
-          S->C1: 111 <kennel> <kennel1>
+          S->C1: 110 <kennel> <kennel1>
         [Bad command usage]
           C: CMD <kennel> LICK 
           S->C1: 100 <kennel>
@@ -422,7 +422,7 @@ Table of Contents
           S: 010 <kennel> <C>
         [C is not in a private kennel]
           C: CMD <kennel> BITE
-          S: 108 <kennel> <C>
+          S: 107 <kennel> <C>
         [AFM status]
           S->C:101 <kennel>
 
@@ -455,10 +455,10 @@ Table of Contents
           C2->S: CMD <kennel> ACCEPT_FETCH <C1> <file_infos>
           S->C1: 202 <C2> <file_infos>
           [Communication impossible]
-          C1->S: 109 <C2> <file_infos>
-          S->C2: 109 <C1> <file_infos>
+          C1->S: 108 <C2> <file_infos>
+          S->C2: 108 <C1> <file_infos>
           [Invalid file]
-          C1->C2: 110 <file_infos>
+          C1->C2: 109 <file_infos>
         [Refusal]
           C2->S: CMD <kennel> REFUSE_FETCH <C1> <file_infos>
           S->C1: 302 <C2> <file_infos>
@@ -473,7 +473,7 @@ Table of Contents
 
       Complementary informations:
         In case C1 can't establish a communication with C2, C1 sends a message 
-        to the server with the code 111 to inform the other client of the 
+        to the server with the code 108 to inform the other client of the 
         communication failure. Upon the acceptation of the second client, the 
         client hosting the file must check if the file is valid and send the 
         code 112 along with the file informations if the file appear to 
@@ -529,7 +529,9 @@ Table of Contents
 
   Format :
       C: MSG <kennel> <message>
-      S: 000 <kennel> <message>
+      S: 000 <kennel> <C> <message>
+  Format of server message :
+      S: 000 <kennel> "!" <message>
 
 2.3 Operating specifications
 
