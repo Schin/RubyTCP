@@ -375,10 +375,10 @@ Table of Contents
           C1: CMD <kennel> LICK <kennel1> <C2>
           S->C2: 009 <kennel> <C1>
         [Acceptation]
-          C2->S: CMD ACCEPT_LICK <kennel1> <C1> 
+          C2->S: CMD <kennel> ACCEPT_LICK <kennel1> <C1> 
           S->C1: 201 <kennel1> <C2> 
         [Refusal]
-          C2->S: CMD REFUSE_LICK <kennel1> <C1> 
+          C2->S: CMD <kennel> REFUSE_LICK <kennel1> <C1> 
           S->C1: 301 <kennel1> <C2> 
         [Already attributed kennel name &
          not member of the kennel]
@@ -449,10 +449,10 @@ Table of Contents
         Port must be a valid port number (between 1 and 65535).
 
       Formats:
-        C1: <kennel> CMD FETCH <C2> <port> <file_infos>
+        C1: CMD <kennel> FETCH <C2> <port> <file_infos>
         S->C2: 011 <kennel> <C1> <port> <file_infos>
         [Acceptation]
-          C2->S: CMD ACCEPT_FETCH <C1> <file_infos>
+          C2->S: CMD <kennel> ACCEPT_FETCH <C1> <file_infos>
           S->C1: 202 <C2> <file_infos>
           [Communication impossible]
           C1->S: 109 <C2> <file_infos>
@@ -460,7 +460,7 @@ Table of Contents
           [Invalid file]
           C1->C2: 110 <file_infos>
         [Refusal]
-          C2->S: CMD REFUSE_FETCH <C1> <file_infos>
+          C2->S: CMD <kennel> REFUSE_FETCH <C1> <file_infos>
           S->C1: 302 <C2> <file_infos>
         [Bad command usage]
           C: CMD <kennel> FETCH

@@ -187,7 +187,8 @@ class DNCServer
 
 		if err == 0 then
 			broadcast("004", kennels["Public"], user.name+" "+name)
-			kennels["Public"].change_name(user.name,name)
+			kennels["Public"].delete(socket)
+			kennels["Public"].users[name] = user
 			user.name = name
 		else
 			respond("104", socket, name) if err == 1
@@ -220,7 +221,7 @@ class DNCServer
 		end
 
 		if not kennels["Public"].exists_user(name) then
-			respond("105", user, name)
+			respond("105", socket, name)
 			return
 		end
 
@@ -308,11 +309,23 @@ class DNCServer
 	end
 
 	def bite(socket, kennel)
+		user = kennels["Public"].get_user_by_sock(socket)
+
+		if user.status == "AFM" then
+			respond("101", socket, "")
+			return
+		end
+
+		if not kennels[kennel] then
+			respond("111", socket, kennel)
+			return
+		end
+
 		if kennel == "Public" then
 			respond("108", socket, "")
 		else
 			kennels[kennel].delete(socket)
-			respond("010", socket, "")
+			broadcast("010", kennel, kennel+" "+user.name)
 		end
 	end
 
@@ -442,12 +455,6 @@ class DNCServer
 			}
 		end
 
-		def change_name(old_name, new_name)
-			users.each { |key, value|
-				key = new_name if key == old_name
-			}
-		end
-
 		def get_all_names
 			res = ""
 			users.each { |key, value|
@@ -471,10 +478,7 @@ class DNCServer
 		end
 
 		def exists_user(name)
-			users.each { |key, value|
-				return true if key == name
-			}
-			return false
+			return users.member?(name)
 		end
 	end
 
