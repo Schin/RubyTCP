@@ -376,13 +376,13 @@ class DNCServer
 
 	def broadcast(type, kennel, message)
 		kennel.users.each { |key, value|
-			value.socket.puts type + " " + kennel.name + " " + message if key != "unknown"
+			value.socket.puts type + " " + kennel.name + " " + message+"\r\n" if key != "unknown"
 		}
 		#Save dans logs
 	end
 
 	def respond(type, user_sock, message)
-		user_sock.puts type + " Self " + message
+		user_sock.puts type + " Self " + message+"\r\n"
 	end
 
 	def accept_new_connection

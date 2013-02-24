@@ -1,7 +1,7 @@
 =begin
 ** Form generated from reading ui file 'dnc_client.ui'
 **
-** Created: ven. févr. 22 16:45:59 2013
+** Created: sam. févr. 23 22:23:15 2013
 **      by: Qt User Interface Compiler version 4.8.3
 **
 ** WARNING! All changes made in this file will be lost when recompiling ui file!
@@ -64,6 +64,7 @@ class Ui_DNC_chat
     @send_button = Qt::PushButton.new(@gridLayoutWidget)
     @send_button.objectName = "send_button"
     @send_button.minimumSize = Qt::Size.new(80, 30)
+
     @chat_layout.addWidget(@send_button, 1, 1, 1, 1)
 
     @message_line = Qt::LineEdit.new(@gridLayoutWidget)
@@ -108,6 +109,7 @@ class Ui_DNC_chat
 
     retranslateUi(dNC_chat)
     Qt::Object.connect(@actionQuit, SIGNAL('activated()'), dNC_chat, SLOT('close()'))
+
     @tabWidget.setCurrentIndex(0)
 
 
@@ -127,19 +129,19 @@ class Ui_DNC_chat
     @actionQuit.text = Qt::Application.translate("DNC_chat", "Quit", nil, Qt::Application::UnicodeUTF8)
     @actionQuit.shortcut = Qt::Application.translate("DNC_chat", "Alt+Q", nil, Qt::Application::UnicodeUTF8)
     @send_button.text = Qt::Application.translate("DNC_chat", "Send", nil, Qt::Application::UnicodeUTF8)
+    @send_button.shortcut = Qt::Application.translate("DNC_chat", "Return", nil, Qt::Application::UnicodeUTF8)
     @tabWidget.setTabText(@tabWidget.indexOf(@tab_public), Qt::Application.translate("DNC_chat", "Public", nil, Qt::Application::UnicodeUTF8))
     @menuConnection.title = Qt::Application.translate("DNC_chat", "Server", nil, Qt::Application::UnicodeUTF8)
     end # retranslateUi
 
     def retranslate_ui(dNC_chat)
         retranslateUi(dNC_chat)
-    end   
+    end
 
 end
 
 module Ui
-    class DNC_chat < Ui_DNC_chat   
-        
+    class DNC_chat < Ui_DNC_chat
     end
 end  # module Ui
 
