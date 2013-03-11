@@ -123,7 +123,7 @@ class DNC_Client
 			when "103" # COLLAR already exists
 				puts data+" is already written on a dog collar"
 			when "104" # COLLAR invalid
-				puts data+" is not a proper dog name. Your master will never call you that !"
+				puts data+" is not a proper dog name. Your master will never call you like that !"
 			when "105" # non existant username
 				puts "I'm affraid " + data + " is not among us..."
 			when "106" # LICK kennel already exists + not a member

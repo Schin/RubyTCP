@@ -322,7 +322,7 @@ Table of Contents
         C1: CMD <kennel> PET <C2>
         [C2 exists]
           S: 006 <kennel> <C1> <C2>
-        [C2 doesn’t exist]
+        [C2 doesn’t exist & C1 == C2]
           S->C1: 105 <kennel> <C2>
         [Bad command usage]
           C: CMD <kennel> PET 
@@ -384,7 +384,7 @@ Table of Contents
          not member of the kennel]
           C: CMD <kennel> LICK <kennel1> <C2>
           S->C1: 106 <kennel1>
-        [C2 does not exist]
+        [C2 does not exist & C1 == C2]
           C: CMD <kennel> LICK <kennel1> <C2>
           S: 105 <kennel> <C2>
         [Invalid kennel name]
@@ -462,6 +462,9 @@ Table of Contents
         [Refusal]
           C2->S: CMD <kennel> REFUSE_FETCH <C1> <file_infos>
           S->C1: 302 <C2> <file_infos>
+        [C2 does not exist & C1 == C2]
+          C: CMD <kennel> LICK <kennel1> <C2>
+          S: 105 <kennel> <C2>
         [Bad command usage]
           C: CMD <kennel> FETCH
           S: 100 <kennel>

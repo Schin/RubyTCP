@@ -254,6 +254,8 @@ class DNCServer
 			return
 		end
 
+		#Un contrôle pour qu'on se lick pas soit même ?
+		
 		if not kennels["Public"].exists_user(name) then
 			respond("105", socket, name)
 			return
@@ -265,9 +267,11 @@ class DNCServer
 			respond("111", socket, kennel)
 			return
 		else
-			respond("106", socket, kennel) if err == 2 and not kennels[kennel].get_user_by_name(user.name)
-			return
-		end 
+			if err == 2 and not kennels[kennel].get_user_by_name(user.name) then
+				respond("106", socket, kennel)
+				return
+			end
+		end
 
 		kennels[kennel] = Kennel.new(kennel)
 		kennels[kennel].users[user.name] = user
