@@ -110,8 +110,8 @@ class DNC_Client
 				end
 			when "011" # FETCH
 				inviter, ip, port, file = data.split(" ")
-				puts "File tarnsfer : #{file}. Do you accept ? [Y/N]"
-				file_menu(file, port, ip)
+				puts "File tarnsfer from #{inviter} : #{file}. Do you accept ? [Y/N]"
+				file_menu(inviter, file, port, ip)
 			when "012" # HELP
 			when "013" # YAP
 				name, msg = data.split(" ",2)
@@ -190,13 +190,14 @@ class DNC_Client
 		puts "Transfered"
 	end
 
-	def file_menu(filename, port, target="")
+	def file_menu(inviter, filename, port, target="")
 	    choice = gets.chomp
 	    case choice
-	    when "Y" or "y"
-	      @chat_client.puts "CMD Public ACCEPT_LICK \r\n"
-	    when "N" or "n" 
-	      @chat_client.puts "CMD Public "+line[1..-1].strip + "\r\n"
+	    when "Y", "y"
+	      @chat_client.puts "CMD Public ACCEPT_LICK #{inviter} #{filename}\r\n"
+	      file_receive(filename, port)
+	    when "N", "n" 
+	      @chat_client.puts "CMD Public REFUSE_LICK #{inviter} #{filename}\r\n"
 	    else
 	      puts "Choose either Y or N."
 	      file_menu

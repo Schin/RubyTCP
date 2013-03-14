@@ -260,7 +260,7 @@ class DNCServer
 			return
 		end
 
-		#Un contrôle pour qu'on se lick pas soit même ?
+		#Improvment : Un contrôle pour qu'on se lick pas soit même
 		
 		if not kennels["Public"].exists_user(name) then
 			respond("105", socket, name)
@@ -284,7 +284,7 @@ class DNCServer
 
 		target = kennels["Public"].users[name].socket
 
-		respond("009", target, kennel)
+		respond("009", target, user.name+" "+kennel)
 	end
 
 	def response_lick(socket, params, status)
@@ -315,9 +315,9 @@ class DNCServer
 
 		if status then
 			kennels[kennel].users[user.name] = user
-			respond("201", target, kennel+" "+socket.name)
+			respond("201", target, kennel+" "+user.name)
 		else
-			respond("301", target, kennel+" "+socket.name)
+			respond("301", target, kennel+" "+user.name)
 		end
 	end
 
@@ -347,7 +347,7 @@ class DNCServer
 			respond("100", socket, "")
 			return
 		else
-			file, name = params.split(" ")
+			name, port, file = params.split(" ")
 			if not file or not name then
 				respond("100", socket, "")
 				return	
@@ -370,7 +370,7 @@ class DNCServer
 
 		target = kennels["Public"].users[name].socket
 
-		respond("011", target, file)
+		respond("011", target, user.name+" "+user.ip+" "+port+" "+file)
 	end
 
 	def response_fetch(socket, params, status)
@@ -378,7 +378,7 @@ class DNCServer
 			respond("100", socket, "")
 			return
 		else
-			file, name = params.split(" ")
+			name, file = params.split(" ")
 			if not file or not name then
 				respond("100", socket, "")
 				return	
@@ -390,9 +390,9 @@ class DNCServer
 		target = kennels["Public"].users[name].socket
 
 		if status then
-			respond("202", target, file+" "+socket.name)
+			respond("202", target, user.name+" "+file)
 		else
-			respond("302", target, file+" "+socket.name)
+			respond("302", target, user.name+" "+file)
 		end
 	end
 
@@ -412,7 +412,7 @@ class DNCServer
 
 		target = kennels["Public"].users[name].socket
 
-		respond("108", target, file+" "+socket.name)
+		respond("108", target, file+" "+user.name)
 	end
 
 	def help(socket)
