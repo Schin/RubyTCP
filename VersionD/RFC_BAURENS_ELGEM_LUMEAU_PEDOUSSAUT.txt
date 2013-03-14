@@ -455,7 +455,7 @@ Table of Contents
           C2->S: CMD <kennel> ACCEPT_FETCH <C1> <file_infos>
           S->C1: 202 <C2> <file_infos>
           [Communication impossible]
-          C1->S: 108 <C2> <file_infos>
+          C1->S: CMD <kennel> IMPOSSIBLE_FETCH <C2> <file_infos>
           S->C2: 108 <C1> <file_infos>
           [Invalid file]
           C1->C2: 109 <file_infos>

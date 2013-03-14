@@ -139,6 +139,12 @@ class DNCServer
 				bite(sock, kennel)
 			when "FETCH"
 				fetch(sock, params)
+			when "ACCEPT_FETCH"
+				response_fetch(sock, params, true)
+			when "REFUSE_FETCH"
+				response_fetch(sock, params, false)
+			when "IMPOSSIBLE_FETCH"
+				impossible_fetch(sock, params)
 			when "HELP"
 				help(sock)
 			when "YAP"
@@ -306,6 +312,7 @@ class DNCServer
 		end
 
 		target = kennels["Public"].users[name].socket
+
 		if status then
 			kennels[kennel].users[user.name] = user
 			respond("201", target, kennel+" "+socket.name)
@@ -335,7 +342,77 @@ class DNCServer
 		end
 	end
 
-	def fetch(socket)
+	def fetch(socket, params)
+		if not params then
+			respond("100", socket, "")
+			return
+		else
+			file, name = params.split(" ")
+			if not file or not name then
+				respond("100", socket, "")
+				return	
+			end
+		end
+
+		user = kennels["Public"].get_user_by_sock(socket)
+
+		if user.status == "AFM" then
+			respond("101", socket, "")
+			return
+		end
+
+		#Un contrôle pour qu'on se fetch pas soit même ?
+		
+		if not kennels["Public"].exists_user(name) then
+			respond("105", socket, name)
+			return
+		end
+
+		target = kennels["Public"].users[name].socket
+
+		respond("011", target, file)
+	end
+
+	def response_fetch(socket, params, status)
+		if not params then
+			respond("100", socket, "")
+			return
+		else
+			file, name = params.split(" ")
+			if not file or not name then
+				respond("100", socket, "")
+				return	
+			end
+		end
+
+		user = kennels["Public"].get_user_by_sock(socket)
+
+		target = kennels["Public"].users[name].socket
+
+		if status then
+			respond("202", target, file+" "+socket.name)
+		else
+			respond("302", target, file+" "+socket.name)
+		end
+	end
+
+	def impossible_fetch(socket, params)
+		if not params then
+			respond("100", socket, "")
+			return
+		else
+			file, name = params.split(" ")
+			if not file or not name then
+				respond("100", socket, "")
+				return	
+			end
+		end
+
+		user = kennels["Public"].get_user_by_sock(socket)
+
+		target = kennels["Public"].users[name].socket
+
+		respond("108", target, file+" "+socket.name)
 	end
 
 	def help(socket)
