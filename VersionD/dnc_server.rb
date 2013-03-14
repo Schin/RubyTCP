@@ -116,49 +116,49 @@ class DNCServer
 		cmd.upcase!
 		case cmd
 			when "GO"
-				go(sock)
+				go(kennel, sock)
 			when "AFM"
-				afm(sock)
+				afm(kennel, sock)
 			when "BACK"
-				back(sock)
+				back(kennel, sock)
 			when "COLLAR"
-				collar(sock, params)
+				collar(kennel, sock, params)
 			when "BARK"
-				bark(sock, params)
+				bark(kennel, sock, params)
 			when "PET"
-				pet(sock, params)
+				pet(kennel, sock, params)
 			when "SNIFF"
-				sniff(sock, kennel)
+				sniff(kennel, sock, kennel)
 			when "LICK"
-				lick(sock, params)
+				lick(kennel, sock, params)
 			when "ACCEPT_LICK"
-				response_lick(sock, params, true)
+				response_lick(kennel, sock, params, true)
 			when "REFUSE_LICK"
-				response_lick(sock, params, false)
+				response_lick(kennel, sock, params, false)
 			when "BITE"
-				bite(sock, kennel)
+				bite(kennel, sock)
 			when "FETCH"
-				fetch(sock, params)
+				fetch(kennel, sock, params)
 			when "ACCEPT_FETCH"
-				response_fetch(sock, params, true)
+				response_fetch(kennel, sock, params, true)
 			when "REFUSE_FETCH"
-				response_fetch(sock, params, false)
+				response_fetch(kennel, sock, params, false)
 			when "IMPOSSIBLE_FETCH"
-				impossible_fetch(sock, params)
+				impossible_fetch(kennel, sock, params)
 			when "HELP"
-				help(sock)
+				help(kennel, sock)
 			when "YAP"
-				yap(sock, params)
+				yap(kennel, sock, params)
 			else
 
 		end
 	end
 
-	def go(socket)
+	def go(kennel, socket)
 		respond("001", socket, "")
 	end
 
-	def afm(socket)
+	def afm(kennel, socket)
 		user = kennels["Public"].get_user_by_sock(socket)
 		if user.status == "AFM" then
 			respond("101", socket, "")
@@ -168,7 +168,7 @@ class DNCServer
 		end
 	end
 
-	def back(socket)
+	def back(kennel, socket)
 		user = kennels["Public"].get_user_by_sock(socket)
 		if user.status == "connected" then
 			respond("102", socket, "Hum... you're already here...")
@@ -178,7 +178,7 @@ class DNCServer
 		end
 	end
 
-	def collar(socket, name)
+	def collar(kennel, socket, name)
 		if not name then
 			respond("100", socket, "")
 			return
@@ -204,18 +204,18 @@ class DNCServer
 		end
 	end
 
-	def bark(socket, message)
+	def bark(kennel, socket, message)
 		if kennels["Public"].get_user_by_sock(socket).status == "AFM" then
 			respond("101", socket, "")
 			return
 		end
 
-		if message then
-			broadcast("005", kennels["Public"], message)
+		if message and kennels[kennel] then
+			broadcast("005", kennels[kennel], message)
 		end
 	end
 
-	def pet(socket, name)
+	def pet(kennel, socket, name)
 		user = kennels["Public"].get_user_by_sock(socket)
 
 		if not name then
@@ -233,15 +233,15 @@ class DNCServer
 			return
 		end
 
-		broadcast("006", kennels["Public"], user.name+" "+name)
+		broadcast("006", kennels[kennel], user.name+" "+name) if kennels[kennel]
 	end
 
-	def sniff(socket, kennel)
+	def sniff(kennelFrom, socket, kennel)
 		list_users = kennels[kennel].get_all_names
 		respond("008", socket, list_users)
 	end
 
-	def lick(socket, params)
+	def lick(kennelFrom, socket, params)
 		if not params then
 			respond("100", socket, "")
 			return
@@ -287,7 +287,7 @@ class DNCServer
 		respond("009", target, user.name+" "+kennel)
 	end
 
-	def response_lick(socket, params, status)
+	def response_lick(kennelFrom, socket, params, status)
 		if not params then
 			respond("100", socket, "")
 			return
@@ -321,7 +321,7 @@ class DNCServer
 		end
 	end
 
-	def bite(socket, kennel)
+	def bite(kennel, socket)
 		user = kennels["Public"].get_user_by_sock(socket)
 
 		if user.status == "AFM" then
@@ -342,7 +342,7 @@ class DNCServer
 		end
 	end
 
-	def fetch(socket, params)
+	def fetch(kennel, socket, params)
 		if not params then
 			respond("100", socket, "")
 			return
@@ -373,7 +373,7 @@ class DNCServer
 		respond("011", target, user.name+" "+user.ip+" "+port+" "+file)
 	end
 
-	def response_fetch(socket, params, status)
+	def response_fetch(kennel, socket, params, status)
 		if not params then
 			respond("100", socket, "")
 			return
@@ -396,7 +396,7 @@ class DNCServer
 		end
 	end
 
-	def impossible_fetch(socket, params)
+	def impossible_fetch(kennel, socket, params)
 		if not params then
 			respond("100", socket, "")
 			return
@@ -415,12 +415,12 @@ class DNCServer
 		respond("108", target, user.name+" "+file)
 	end
 
-	def help(socket)
+	def help(kennel, socket)
 		list = "yap-Send_a_private_message_to_the_specified_dog"
 		respond("012", socket, list)
 	end
 
-	def yap(socket, params)
+	def yap(kennel, socket, params)
 		user = kennels["Public"].get_user_by_sock(socket)
 
 		if not params then
