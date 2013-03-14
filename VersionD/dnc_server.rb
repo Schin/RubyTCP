@@ -412,7 +412,7 @@ class DNCServer
 
 		target = kennels["Public"].users[name].socket
 
-		respond("108", target, file+" "+user.name)
+		respond("108", target, user.name+" "+file)
 	end
 
 	def help(socket)
@@ -491,7 +491,7 @@ class DNCServer
   	end
 
   	def kennelname_validator(name)
-  		return 1 if !/^[a-zA-Z0-9]{3,18}$/.match(name) 
+  		return 1 if !/^[a-zA-Z0-9]{3,18}$/.match(name) or name.upcase == "PUBLIC"
 		kennels[name] ? 2 : 0
   	end
 
