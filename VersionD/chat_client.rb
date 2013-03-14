@@ -109,6 +109,9 @@ class DNC_Client
 					puts data+" has left "+kennel
 				end
 			when "011" # FETCH
+				inviter, ip, port, file = data.split(" ")
+				puts "File tarnsfer : #{file}. Do you accept ? [Y/N]"
+				file_menu(file, port, ip)
 			when "012" # HELP
 			when "013" # YAP
 				name, msg = data.split(" ",2)
@@ -152,6 +155,54 @@ class DNC_Client
 			else
 		end
 	end
+
+	def file_transfer(filename, port, target)
+		sock = TCPSocket.new(target, port)
+		puts "Transfering : #{filename}"
+		begin		
+			file = open(filename, "rb")
+			fileContent = file.read
+			sock.puts fileContent
+		rescue Exception => e
+
+		ensure
+			sock.close
+			file.close
+		end
+		puts "Transfered"
+	end
+
+	def file_receive(filename, port)
+		sock = TCPServer.new("", port)
+		puts "Waiting for file : #{filename}"
+		con = sock.accept
+		msg = con.read
+		begin
+			destFile = File.open(filename, 'wb')
+			destFile.print msg
+		rescue Exception => e
+		
+		ensure
+			destFile.close
+			sock.close
+		end
+
+		puts "Transfered"
+	end
+
+	def file_menu(filename, port, target="")
+	    choice = gets.chomp
+	    case choice
+	    when "Y" or "y"
+	      @chat_client.puts "CMD Public ACCEPT_LICK \r\n"
+	    when "N" or "n" 
+	      @chat_client.puts "CMD Public "+line[1..-1].strip + "\r\n"
+	    else
+	      puts "Choose either Y or N."
+	      file_menu
+	    end
+	end
 end
 
 client = DNC_Client.new(DOMAIN, PORT).run
+

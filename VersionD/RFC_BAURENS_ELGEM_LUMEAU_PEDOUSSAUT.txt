@@ -373,7 +373,7 @@ Table of Contents
       Formats:
         [Normal use]
           C1: CMD <kennel> LICK <kennel1> <C2>
-          S->C2: 009 <kennel> <C1>
+          S->C2: 009 <kennel> <C1> <kennel1>
         [Acceptation]
           C2->S: CMD <kennel> ACCEPT_LICK <kennel1> <C1> 
           S->C1: 201 <kennel1> <C2> 
@@ -450,7 +450,7 @@ Table of Contents
 
       Formats:
         C1: CMD <kennel> FETCH <C2> <port> <file_infos>
-        S->C2: 011 <kennel> <C1> <port> <file_infos>
+        S->C2: 011 <kennel> <C1> <C1 ip> <port> <file_infos>
         [Acceptation]
           C2->S: CMD <kennel> ACCEPT_FETCH <C1> <file_infos>
           S->C1: 202 <C2> <file_infos>
@@ -463,7 +463,7 @@ Table of Contents
           C2->S: CMD <kennel> REFUSE_FETCH <C1> <file_infos>
           S->C1: 302 <C2> <file_infos>
         [C2 does not exist & C1 == C2]
-          C: CMD <kennel> LICK <kennel1> <C2>
+          C: CMD <kennel> LICK <kennel1> <C2>names = data.split(" ")
           S: 105 <kennel> <C2>
         [Bad command usage]
           C: CMD <kennel> FETCH
